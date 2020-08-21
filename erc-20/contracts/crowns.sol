@@ -43,7 +43,7 @@ contract Crowns is Context, IERC20, Ownable {
         address investManager = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
         address communityManager = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
         address newOwner = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
-        
+            
         uint256 inGameAirdrop = 3 * _million * _decimalFactor;
         uint256 rechargeDex = inGameAirdrop; // same as to use in game, airdrops: 3 million tokens
         uint256 teamAllocation = 1 * _million * _decimalFactor;
@@ -67,21 +67,38 @@ contract Crowns is Context, IERC20, Ownable {
     uint256 public totalDividends = 0;
 
     function dividendsOwing (address account) public view returns(uint256) {
-      uint256 newDividends = totalDividends - _accounts[account].lastDividends;
-      uint256 res = _accounts[account].balance.mul(newDividends);
-      return res.div(_totalSupply.sub(unClaimedDividends));
+      uint256 newDividends = totalDividends.sub(_accounts[account].lastDividends);
+      uint256 proportion = _accounts[account].balance.mul(newDividends);
+      
+      // dividends owing proportional to current balance of the account.
+      // The dividend is not a part of total supply, since was moved out of balances
+      uint256 supply = _totalSupply.sub(newDividends);
+      uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+      
+      return dividends;
     }
     
     modifier updateAccount(address account) {
       uint256 owing = dividendsOwing(account);
       if(owing > 0) {
-        _accounts[account].balance += owing;
+        _accounts[account].balance = _accounts[account].balance.add(owing);
         _accounts[account].lastDividends = totalDividends;
-        unClaimedDividends -= owing;
+        unClaimedDividends = unClaimedDividends.sub(owing);
       } else {
           _accounts[account].lastDividends = totalDividends;
       }
       _;
+    }
+    
+    function explicityUpdate(address account) public onlyOwner() {
+        uint256 owing = dividendsOwing(account);
+          if(owing > 0) {
+            _accounts[account].balance = _accounts[account].balance.add(owing);
+            _accounts[account].lastDividends = totalDividends;
+            unClaimedDividends = unClaimedDividends.sub(owing);
+          } else {
+              _accounts[account].lastDividends = totalDividends;
+          }
     }
 
         /**
