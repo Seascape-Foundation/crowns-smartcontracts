@@ -3,7 +3,7 @@ const Crown = function(addresses) {
 	this.balances = {};
 
 	// burndropping
-	this.spent = 0;
+	this.spent == 0;
 	this.totalSpent = 0;
 
 	// Total Supply
@@ -23,7 +23,7 @@ Crown.prototype.mint = function(address, amount) {
 	}
 
 	if (this.balances[address] == undefined) {
-		this.initBalance(address, amount);		
+		this.initBalance(address, amount);
 	} else {
 		this.addBalance(address, amount);
 	}
@@ -32,7 +32,7 @@ Crown.prototype.mint = function(address, amount) {
 };
 
 /**
- * Warning, no validation! 
+ * Warning, no validation!
  * Assume that address has no any recorded balance in the contract.
  * @param  {[type]} address [description]
  * @param  {[type]} amount  [description]
@@ -43,7 +43,7 @@ Crown.prototype.initBalance = function(address, amount) {
 };
 
 /**
- * Warning, no validation! 
+ * Warning, no validation!
  * Assume that address has a record.
  * @param  {[type]} address [description]
  * @return {[type]}         [description]
@@ -94,12 +94,12 @@ Crown.prototype.transfer = function(from, to, amount) {
 
 	if (this.balances[to] == undefined) {
 		this.balances[to] = 0;
-	} 
+	}
 
 	// make sure that player has enough token to transfer
 	// How many tokens could be returned for every token
 	let balance = this.getBalance(from);
-	
+
 	// Amount is sum of actual balance and money that player had received from rebalancing.
 	// In a transfer, the value of rebalaning should be changed. As it affects balance of all token holders.
 	// Therefore we have to get balance without number of rebalancing. We use a ratio for that:
@@ -128,7 +128,7 @@ Crown.prototype.burn = function(address, amount) {
 		throw "Not enough balance to burn!";
 	}
 	let balance = this.getBalance(address);
-	
+
 	// Amount is sum of actual balance and money that player had received from rebalancing.
 	// In a transfer, the value of rebalaning should be changed. As it affects balance of all token holders.
 	// Therefore we have to get balance without number of rebalancing. We use a ratio for that:
@@ -195,7 +195,7 @@ Crown.prototype.totalSupply = function() {
 
 
 let crown = new Crown();
-crown.mint('nicky', 25); crown.mint('medet', 25); crown.mint('dave', 25); crown.mint('cat', 25); 
+crown.mint('nicky', 25); crown.mint('medet', 25); crown.mint('dave', 25); crown.mint('cat', 25);
 
 if (crown.totalSupply() != 100) {
 	throw "Test failed! Total supply is wrong!";
