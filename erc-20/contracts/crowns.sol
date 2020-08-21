@@ -217,7 +217,7 @@ contract Crowns is Context, IERC20, Ownable {
 
         _accounts[account].balance = _accounts[account].balance.sub(amount);
 
-        unConfirmedDividends += amount;
+        unConfirmedDividends = unConfirmedDividends.add(amount);
 
         emit Transfer(account, address(0), amount);
     }
@@ -245,8 +245,8 @@ contract Crowns is Context, IERC20, Ownable {
      * @return {[type]}        [description]
      */
     function dropDividend() public onlyOwner() returns (bool) {
-    	totalDividends += unConfirmedDividends;
-    	unClaimedDividends += unConfirmedDividends;
+    	totalDividends = totalDividends.add(unConfirmedDividends);
+    	unClaimedDividends = unClaimedDividends.add(unConfirmedDividends);
     	unConfirmedDividends = 0;
     }
 }
