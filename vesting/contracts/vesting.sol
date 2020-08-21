@@ -2,8 +2,11 @@ pragma solidity 0.6.7;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/token/ERC20/SafeERC20.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 
 contract VestingContract is Ownable {
+    using SafeMath for uint256;
+
     struct Grant {
         bool locked;
         uint256 amount;
@@ -16,6 +19,9 @@ contract VestingContract is Ownable {
     IERC20 private _token;
 
     mapping (address => Grant) public _grant;
+    
+    uint256 public balance = 0;
+    uint256 private constant _decimalFactor = 10 ** 18;
 
     constructor (IERC20 token, address newOwner) public {
         _token = token;
@@ -30,9 +36,12 @@ contract VestingContract is Ownable {
     function lock(address beneficiary, uint256 amount, uint256 releaseTime) public onlyOwner() {
         require(releaseTime > block.timestamp, "TokenTimelock: release time is before current time");
         require(_grant[beneficiary].locked == false, "Has locked grant");
+        require(amount > 0, "TokenTimelock: can't lock 0 token");
         
         Grant memory grant = Grant(true, amount, releaseTime);
         _grant[beneficiary] = grant;
+        
+        balance = balance.add(amount);
     }
 
     /**
@@ -60,7 +69,29 @@ contract VestingContract is Ownable {
      * @return the time when the tokens are released.
      */
     function lockedAmount(address beneficiary) public view returns (uint256) {
-        return _grant[beneficiary].amount;
+        uint256 amount = _grant[beneficiary].amount;
+        if (amount == 0) {
+            return 0;
+        }
+
+        // Balance with dividends
+        // this.balance address should not be greater than totalBalance.
+        uint256 totalBalance = _token.balanceOf(address(this));
+        if (balance == totalBalance) {
+            return amount;
+        }
+
+        // Vesting Contract has one locked address. This means all tokens are going straight to him
+        if (amount == balance) {
+            return totalBalance;            
+        }
+        
+        // Amount of Grant Tokens in a percents
+        uint256 grantPercents = amount.mul(_decimalFactor).div(balance);
+        
+        uint256 dividends = totalBalance.mul(grantPercents).div(_decimalFactor);
+        
+        return dividends;
     }
 
     /**
@@ -72,10 +103,12 @@ contract VestingContract is Ownable {
         require(_grant[account].releaseTime <= block.timestamp, "TokenTimelock: current time is before release time");
 
         uint256 amount = _token.balanceOf(address(this));
-        require(amount >= _grant[account].amount, "TokenTimelock: no tokens to release");
+        uint256 lockAmount = lockedAmount(account);  // locked amount with dividends
+        require(amount >= lockAmount, "TokenTimelock: no tokens to release");
 
-        _token.safeTransfer(account, amount);
+        _token.safeTransfer(account, lockAmount);
     
+        balance = balance.sub(_grant[account].amount);
         _grant[account].locked = false;
         _grant[account].amount = 0;
         _grant[account].releaseTime = 0;
