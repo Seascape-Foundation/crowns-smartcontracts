@@ -56,9 +56,21 @@ module.exports = {
 
   // merges with the settings in default
   // used with "embark run livenet"
-  livenet: {}
+  livenet: {},
 
   // you can name an environment with specific settings and then specify with
   // "embark run custom_name" or "embark blockchain custom_name"
   // custom_name: {}
+  rinkeby: {
+    strategy: 'explicit',
+      deploy: {
+        Crowns: {
+         from: "0xCfdCCCD4c70EF6Cc4bfa704CD4d9b5311619361a",
+         args: [ ],
+         gas: '3000000',
+         gasPrice: '20 gwei',
+         // address: '0xbb60fd245e2821bc7a5c6eec4ef77a9a6bedfe53'  // previously deployed token's address
+        }
+    }
+  }
 };

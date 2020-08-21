@@ -70,7 +70,17 @@ module.exports = {
         password: "config/livenet/password"
       }
     ]
-  }
+  },
+
+  rinkeby: {
+    accounts: [
+        {
+          privateKey: "put your contract exported from metamask, here" // Put your password here
+        }
+    ],
+    endpoint: "https://rinkeby.infura.io/v3/6ec0b7098a07434387c4320eb2465d24",
+  },
+
 
   // you can name an environment with specific settings and then specify with
   // "embark run custom_name" or "embark blockchain custom_name"

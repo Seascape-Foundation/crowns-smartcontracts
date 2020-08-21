@@ -12,7 +12,7 @@
     "webserver": false
   },
   "versions": {
-    "solc": "0.6.1"
+    "solc": "0.6.7"
   },
   "plugins": {
     "embark-geth": {}
