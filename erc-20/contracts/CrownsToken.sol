@@ -11,12 +11,12 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contr
 contract Crowns is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
-    
+
     struct Account {
         uint256 balance;
         uint256 lastDividends;
     }
-    
+
     mapping (address => Account) private _accounts;
 
     mapping (address => mapping (address => uint256)) private _allowances;
@@ -26,38 +26,38 @@ contract Crowns is Context, IERC20, Ownable {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
-    
+
     uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
-    constructor () public {
+    constructor (address newOwner) public {
         _name = "Crowns";
         _symbol = "CWS";
         _decimals = 18;
-    
+
         // Grant the minter role to a specified account
         address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
         address rechargeDexManager = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
         address teamManager = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
-        
+
         address investManager = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
         address communityManager = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-        address newOwner = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
-            
+//        address newOwner = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+
         uint256 inGameAirdrop = 3 * _million * _decimalFactor;
         uint256 rechargeDex = inGameAirdrop; // same as to use in game, airdrops: 3 million tokens
         uint256 teamAllocation = 1 * _million * _decimalFactor;
         uint256 investment = teamAllocation;    // same as team allocation: 1 million tokens
         uint256 communityBounty = 750000 * _decimalFactor;  // 750,000 tokens
         uint256 inGameReserve = 1250000 * _decimalFactor; // reserve for the next 5 years.
-        
+
         _mint(inGameAirdropper, inGameAirdrop);
         _mint(rechargeDexManager, rechargeDex);
         _mint(teamManager, teamAllocation);
         _mint(investManager, investment);
         _mint(communityManager, communityBounty);
         _mint(newOwner, inGameReserve);
-        
+
         transferOwnership(newOwner);
     }
 
@@ -69,15 +69,15 @@ contract Crowns is Context, IERC20, Ownable {
     function dividendsOwing (address account) public view returns(uint256) {
       uint256 newDividends = totalDividends.sub(_accounts[account].lastDividends);
       uint256 proportion = _accounts[account].balance.mul(newDividends);
-      
+
       // dividends owing proportional to current balance of the account.
       // The dividend is not a part of total supply, since was moved out of balances
       uint256 supply = _totalSupply.sub(newDividends);
       uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
-      
+
       return dividends;
     }
-    
+
     modifier updateAccount(address account) {
       uint256 owing = dividendsOwing(account);
       if(owing > 0) {
@@ -89,7 +89,7 @@ contract Crowns is Context, IERC20, Ownable {
       }
       _;
     }
-    
+
     function explicityUpdate(address account) public onlyOwner() {
         uint256 owing = dividendsOwing(account);
           if(owing > 0) {
@@ -152,18 +152,18 @@ contract Crowns is Context, IERC20, Ownable {
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
-    
+
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
-    
+
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
-    
+
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
         return true;
@@ -192,7 +192,7 @@ contract Crowns is Context, IERC20, Ownable {
 
         _accounts[sender].balance =  _accounts[sender].balance.sub(amount);
         _accounts[recipient].balance = _accounts[recipient].balance.add(amount);
-        
+
         emit Transfer(sender, recipient, amount);
     }
 
@@ -238,7 +238,7 @@ contract Crowns is Context, IERC20, Ownable {
 
         emit Transfer(account, address(0), amount);
     }
-    
+
     function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
@@ -248,7 +248,7 @@ contract Crowns is Context, IERC20, Ownable {
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
-    
+
     function spend(uint256 amount) public {
         require(getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
@@ -265,5 +265,6 @@ contract Crowns is Context, IERC20, Ownable {
     	totalDividends = totalDividends.add(unConfirmedDividends);
     	unClaimedDividends = unClaimedDividends.add(unConfirmedDividends);
     	unConfirmedDividends = 0;
+        return true;
     }
 }
