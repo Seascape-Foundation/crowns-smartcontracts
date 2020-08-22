@@ -27,13 +27,13 @@ contract Crowns is Context, IERC20, Ownable {
     string private _symbol;
     uint8 private _decimals;
 
-    uint256 private constant _decimalFactor = 10 ** 18;
+    uint256 private constant _decimalFactor = 10 ** 4;
     uint256 private constant _million = 1000000;
 
     constructor (address newOwner) public {
         _name = "Crowns";
         _symbol = "CWS";
-        _decimals = 18;
+        _decimals = 4;
 
         // Grant the minter role to a specified account
         address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;

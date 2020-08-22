@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env", {
+      "targets": {
+        "node": 10
+      }
+    }
+    ]
+  ],
+  "plugins": [
+    ["@babel/plugin-proposal-export-default-from"],
+    ["@babel/plugin-proposal-class-properties"]
+  ]
+}
