@@ -27,8 +27,7 @@
     "eslint-config-node-strict": "^0.0.2"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.0",
     "bn.js": "^5.1.3",
-    "chai-bignumber": "^3.0.0"
+    "chai-bn": "^0.2.1"
   }
 }

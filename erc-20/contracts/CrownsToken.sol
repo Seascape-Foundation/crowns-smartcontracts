@@ -27,13 +27,13 @@ contract Crowns is Context, IERC20, Ownable {
     string private _symbol;
     uint8 private _decimals;
 
-    uint256 private constant _decimalFactor = 10 ** 18;
+    uint256 private constant _decimalFactor = 10 ** 0;
     uint256 private constant _million = 1000000;
 
     constructor (address newOwner) public {
         _name = "Crowns";
         _symbol = "CWS";
-        _decimals = 18;
+        _decimals = 0;
 
         // Grant the minter role to a specified account
         address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
@@ -73,9 +73,13 @@ contract Crowns is Context, IERC20, Ownable {
       // dividends owing proportional to current balance of the account.
       // The dividend is not a part of total supply, since was moved out of balances
       uint256 supply = _totalSupply.sub(newDividends);
-      uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+      uint256 dividends = proportion.div(supply);
 
-      return dividends;
+      uint256 roundedDividends = dividends
+          .div(_decimalFactor)
+          .mul(_decimalFactor);
+
+      return roundedDividends;
     }
 
     modifier updateAccount(address account) {
@@ -173,6 +177,10 @@ contract Crowns is Context, IERC20, Ownable {
         return true;
     }
 
+    function getLastDividends(address addr) public view returns (uint256) {
+        return _accounts[addr].lastDividends;
+    }
+
     function getBalance(address addr) private view returns (uint256) {
         uint256 balance = _accounts[addr].balance;
     	if (balance == 0) {
@@ -255,6 +263,11 @@ contract Crowns is Context, IERC20, Ownable {
         _burn(msg.sender, amount);
     }
 
+    event DividendDropped(
+        uint256 unclaimedDividends,
+        uint256 totalDividends
+    );
+
     /**
      * Warning, no validation!
      * dropDividend changes balance of all token owners.
@@ -265,6 +278,11 @@ contract Crowns is Context, IERC20, Ownable {
     	totalDividends = totalDividends.add(unConfirmedDividends);
     	unClaimedDividends = unClaimedDividends.add(unConfirmedDividends);
     	unConfirmedDividends = 0;
+
+        emit DividendDropped(
+            unClaimedDividends,
+            totalDividends
+        );
         return true;
     }
 }
