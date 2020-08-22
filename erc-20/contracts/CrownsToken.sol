@@ -27,13 +27,13 @@ contract Crowns is Context, IERC20, Ownable {
     string private _symbol;
     uint8 private _decimals;
 
-    uint256 private constant _decimalFactor = 10 ** 0;
+    uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
     constructor (address newOwner) public {
         _name = "Crowns";
         _symbol = "CWS";
-        _decimals = 0;
+        _decimals = 18;
 
         // Grant the minter role to a specified account
         address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
@@ -73,13 +73,9 @@ contract Crowns is Context, IERC20, Ownable {
       // dividends owing proportional to current balance of the account.
       // The dividend is not a part of total supply, since was moved out of balances
       uint256 supply = _totalSupply.sub(newDividends);
-      uint256 dividends = proportion.div(supply);
+      uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
 
-      uint256 roundedDividends = dividends
-          .div(_decimalFactor)
-          .mul(_decimalFactor);
-
-      return roundedDividends;
+      return dividends;
     }
 
     modifier updateAccount(address account) {
@@ -88,6 +84,11 @@ contract Crowns is Context, IERC20, Ownable {
         _accounts[account].balance = _accounts[account].balance.add(owing);
         _accounts[account].lastDividends = totalDividends;
         unClaimedDividends = unClaimedDividends.sub(owing);
+        emit Transfer(
+            address(0),
+            account,
+            owing
+        );
       } else {
           _accounts[account].lastDividends = totalDividends;
       }

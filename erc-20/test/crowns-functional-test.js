@@ -1,8 +1,9 @@
 /* global artifacts, contract, it, config*/
 import BigNumber from 'bn.js';
 import {
-  decimals,
-  getAmountWithDecimalsMultiplier, zero,
+  getAmountWithDecimalsMultiplier,
+  zero,
+  calculateDividend,
 } from './helpers/token-helper';
 import {NOT_ENOUGH_BALANCE, ONLY_OWNER_CALLABLE} from './helpers/errors';
 const Crowns = artifacts.require('Crowns');
@@ -28,6 +29,9 @@ contract('Crowns Token', ([
   nonOwner,
   sender,
   receiver,
+  sender1,
+  receiver1,
+  approvedSender,
 ]) => {
   describe('test functionality of Crowns token', () => {
     before(async function () {
@@ -134,7 +138,7 @@ contract('Crowns Token', ([
       );
     });
 
-    it.only('test dividends Owing for an address', async function () {
+    it('test dividends Owing for an address', async function () {
       await Crowns.methods.spend(this.spendAmount).send({
         from: owner,
       });
@@ -143,89 +147,196 @@ contract('Crowns Token', ([
         from: owner,
       });
 
-      const balance = new BigNumber(
-        (await Crowns.methods.balanceOf(owner).call())
-      );
-      const lastDividends = new BigNumber(
-        (await Crowns.methods.getLastDividends(owner).call())
-      );
-      const totalDividends = new BigNumber(
-        (await Crowns.methods.totalDividends().call())
-      );
-      const totalSupply = new BigNumber(
-        (await Crowns.methods.totalSupply().call())
-      );
+      const dividendWant = await calculateDividend({
+        token: Crowns,
+        address: owner
+      });
 
-      const newDividends = totalDividends.sub(lastDividends);
-      const supply = totalSupply.sub(newDividends);
-      const proportion = newDividends.mul(balance).div(supply);
-      /**
-       * round the value
-       * @type {BN}
-       */
-      const dividendWant = proportion
-        .div(new BigNumber(10).pow(decimals))
-        .mul(new BigNumber(10).pow(decimals));
-
-      const dividendGot = new BigNumber(
-        (await Crowns.methods.dividendsOwing(owner).call())
-      );
+      const dividendGot = await Crowns.methods.dividendsOwing(owner).call();
 
       dividendGot.should.be.bignumber.equal(
         dividendWant
       );
     });
-    // it('sender/receiver should receive dividend upon transfer', async function () {
-    //   await Crowns.methods.transfer(sender, this.spendAmount).send({
-    //     from: owner,
-    //   });
-    //
-    //   await Crowns.methods.transfer(receiver, this.spendAmount).send({
-    //     from: owner,
-    //   });
-    //
-    //   await Crowns.methods.spend(this.spendAmount).send({
-    //     from: owner,
-    //   });
-    //
-    //   await Crowns.methods.dropDividend().send({
-    //     from: owner,
-    //   });
-    //
-    //   const totalDividends = await Crowns.methods.totalDividends().call();
-    //   const unClaimedDividends = await Crowns.methods.unClaimedDividends().call();
-    //   const unConfirmedDividends = await Crowns.methods.unConfirmedDividends().call();
-    //
-    //   const senderBalanceBefore = await Crowns.methods.balanceOf(sender).call();
-    //   const receiverBalanceBefore = await Crowns.methods.balanceOf(receiver).call();
-    //
-    //   const senderDividendsOwingBefore = await Crowns.methods.dividendsOwing(sender).call();
-    //   const receiverDividensdOwingBefore = await Crowns.methods.dividendsOwing(receiver).call();
-    //
-    //   await Crowns.methods.transfer(receiver, this.spendAmount).send({
-    //     from: sender,
-    //   }).should.be.fulfilled;
-    //
-    //   const senderBalanceAfter = await Crowns.methods.balanceOf(sender).call();
-    //   const receiverBalanceAfter = await Crowns.methods.balanceOf(receiver).call();
-    //
-    //   (await Crowns.methods.dividendsOwing(sender).call())
-    //     .should.be.bignumber.equal(new BigNumber(0));
-    //
-    //   (await Crowns.methods.dividendsOwing(receiver).call())
-    //     .should.be.bignumber.equal(new BigNumber(0));
-    //
-    //   senderBalanceAfter.should.be.bignumber.equal(
-    //     new BigNumber(senderBalanceBefore)
-    //       .minus(this.spendAmount)
-    //       .plus(senderDividendsOwingBefore)
-    //   );
-    //
-    //   receiverBalanceAfter.should.be.bignumber.equal(
-    //     receiverBalanceBefore
-    //       .plus(this.spendAmount)
-    //       .plus(receiverDividensdOwingBefore)
-    //   );
-    // });
+
+    it('sender/receiver should receive dividend upon transfer', async function () {
+      await Crowns.methods.transfer(sender, this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.transfer(receiver, this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.spend(this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.dropDividend().send({
+        from: owner,
+      });
+
+      const senderDividendsOwingBefore = await calculateDividend({
+        token: Crowns,
+        address: sender
+      });
+
+      const receiverDividendsOwingBefore = await calculateDividend({
+        token: Crowns,
+        address: receiver
+      });
+
+
+      const senderBalanceBefore = new BigNumber(
+        (await Crowns.methods.balanceOf(sender).call())
+      ).sub(senderDividendsOwingBefore);
+
+      const receiverBalanceBefore = new BigNumber(
+        (await Crowns.methods.balanceOf(receiver).call())
+      ).sub(receiverDividendsOwingBefore);
+
+
+      const {
+        events: {
+          Transfer: Transfers
+        }
+      } = await Crowns.methods.transfer(receiver, this.spendAmount).send({
+        from: sender,
+      }).should.be.fulfilled;
+
+      const transferredAmounts = [
+        senderDividendsOwingBefore,
+        receiverDividendsOwingBefore,
+        this.spendAmount,
+      ];
+
+      Transfers.forEach(
+        (
+          {
+            returnValues: {
+              value
+            }
+          },
+          idx
+        ) => {
+          value.should.be.bignumber.equal(
+            transferredAmounts[idx],
+          );
+        }
+      );
+
+      const senderBalanceAfter = await Crowns.methods.balanceOf(sender).call();
+      const receiverBalanceAfter = await Crowns.methods.balanceOf(receiver).call();
+
+      (await Crowns.methods.dividendsOwing(sender).call())
+        .should.be.bignumber.equal(new BigNumber(0));
+
+      (await Crowns.methods.dividendsOwing(receiver).call())
+        .should.be.bignumber.equal(new BigNumber(0));
+
+      senderBalanceAfter.should.be.bignumber.equal(
+        new BigNumber(senderBalanceBefore)
+          .sub(this.spendAmount)
+          .add(senderDividendsOwingBefore)
+      );
+
+      receiverBalanceAfter.should.be.bignumber.equal(
+        receiverBalanceBefore
+          .add(this.spendAmount)
+          .add(receiverDividendsOwingBefore)
+      );
+    });
+
+    it('sender1/receiver1 should receive dividend upon transferFrom', async function () {
+      await Crowns.methods.transfer(sender1, this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.transfer(receiver1, this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.spend(this.spendAmount).send({
+        from: owner,
+      });
+
+      await Crowns.methods.dropDividend().send({
+        from: owner,
+      });
+
+      const senderDividendsOwingBefore = await calculateDividend({
+        token: Crowns,
+        address: sender1
+      });
+
+      const receiverDividendsOwingBefore = await calculateDividend({
+        token: Crowns,
+        address: receiver1
+      });
+
+
+      const senderBalanceBefore = new BigNumber(
+        (await Crowns.methods.balanceOf(sender1).call())
+      ).sub(senderDividendsOwingBefore);
+
+      const receiverBalanceBefore = new BigNumber(
+        (await Crowns.methods.balanceOf(receiver1).call())
+      ).sub(receiverDividendsOwingBefore);
+
+
+      await Crowns.methods.approve(approvedSender, this.spendAmount).send({
+        from: sender1,
+      });
+
+      const {
+        events: {
+          Transfer: Transfers
+        }
+      } = await Crowns.methods.transferFrom(sender1, receiver1, this.spendAmount).send({
+        from: approvedSender,
+      }).should.be.fulfilled;
+
+      const transferredAmounts = [
+        senderDividendsOwingBefore,
+        receiverDividendsOwingBefore,
+        this.spendAmount,
+      ];
+
+      Transfers.forEach(
+        (
+          {
+            returnValues: {
+              value
+            }
+          },
+          idx
+        ) => {
+          value.should.be.bignumber.equal(
+            transferredAmounts[idx],
+          );
+        }
+      );
+
+      const senderBalanceAfter = await Crowns.methods.balanceOf(sender1).call();
+      const receiverBalanceAfter = await Crowns.methods.balanceOf(receiver1).call();
+
+      (await Crowns.methods.dividendsOwing(sender1).call())
+        .should.be.bignumber.equal(new BigNumber(0));
+
+      (await Crowns.methods.dividendsOwing(receiver1).call())
+        .should.be.bignumber.equal(new BigNumber(0));
+
+      senderBalanceAfter.should.be.bignumber.equal(
+        new BigNumber(senderBalanceBefore)
+          .sub(this.spendAmount)
+          .add(senderDividendsOwingBefore)
+      );
+
+      receiverBalanceAfter.should.be.bignumber.equal(
+        receiverBalanceBefore
+          .add(this.spendAmount)
+          .add(receiverDividendsOwingBefore)
+      );
+    });
   });
 });
