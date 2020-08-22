@@ -109,7 +109,7 @@ contract('Vesting', ([
       );
     });
 
-    it.only('grant tokens and release with dividends existing', async function () {
+    it('grant tokens and release with dividends existing', async function () {
       const releaseTime = Math.ceil(new Date() / 1000) + 1000;
 
       await Crowns.methods.transfer(VestingContract.address, this.spendAmount).send({

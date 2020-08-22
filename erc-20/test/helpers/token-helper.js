@@ -2,7 +2,7 @@
 import BigNumber from 'bn.js';
 
 
-export const decimals = new BigNumber(4);
+export const decimals = new BigNumber(18);
 
 export const getAmountWithDecimalsMultiplier = (amount) =>
   (amount.mul(new BigNumber(10).pow(decimals))
