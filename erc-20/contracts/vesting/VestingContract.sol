@@ -77,11 +77,6 @@ contract VestingContract is Ownable {
         uint256 dividendOwings = _token.dividendsOwing(address(this));
         uint256 balance = totalBalance.sub(dividendOwings);
 
-        // Vesting Contract has one locked address. This means all tokens are going straight to him
-        // if (amount == balance) {
-            // return totalBalance;            
-        // }
-        
         // Amount of Grant Tokens in a percents
         uint256 grantPercents = amount.mul(_decimalFactor).div(balance);
         
