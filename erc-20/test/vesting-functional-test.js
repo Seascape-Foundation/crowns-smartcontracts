@@ -12,7 +12,12 @@ config({
   contracts: {
     deploy: {
       Crowns: {
-        args: [ '$accounts[0]' ],
+        args: [
+          '$accounts[0]',
+          '$accounts[1]',
+          '$accounts[2]',
+          '$accounts[3]'
+        ],
       },
       VestingContract: {
         args: [ '$Crowns', '$accounts[0]' ]

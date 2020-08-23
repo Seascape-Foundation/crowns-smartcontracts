@@ -30,35 +30,49 @@ contract Crowns is Context, IERC20, Ownable {
     uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
-    constructor (address newOwner) public {
+//    constructor () public {
+//        _name = "Crowns";
+//        _symbol = "CWS";
+//        _decimals = 18;
+//
+//        // Grant the minter role to a specified account
+//        address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
+//        address rechargeDexManager = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
+//        address teamManager = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
+//
+//        address investManager = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
+//        address communityManager = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
+//        address newOwner = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+//
+//        uint256 inGameAirdrop = 3 * _million * _decimalFactor;
+//        uint256 rechargeDex = inGameAirdrop; // same as to use in game, airdrops: 3 million tokens
+//        uint256 teamAllocation = 1 * _million * _decimalFactor;
+//        uint256 investment = teamAllocation;    // same as team allocation: 1 million tokens
+//        uint256 communityBounty = 750000 * _decimalFactor;  // 750,000 tokens
+//        uint256 inGameReserve = 1250000 * _decimalFactor; // reserve for the next 5 years.
+//
+//        _mint(inGameAirdropper, inGameAirdrop);
+//        _mint(rechargeDexManager, rechargeDex);
+//        _mint(teamManager, teamAllocation);
+//        _mint(investManager, investment);
+//        _mint(communityManager, communityBounty);
+//        _mint(newOwner, inGameReserve);
+//
+//        transferOwnership(newOwner);
+//    }
+
+    // this is temporary constructor for testing
+    constructor (address addr1, address addr2, address addr3, address addr4) public {
         _name = "Crowns";
         _symbol = "CWS";
         _decimals = 18;
 
-        // Grant the minter role to a specified account
-        address inGameAirdropper = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
-        address rechargeDexManager = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
-        address teamManager = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
+        _mint(addr1, 2500000 * (10 ** 18));
+        _mint(addr2, 2500000 * (10 ** 18));
+        _mint(addr3, 2500000 * (10 ** 18));
+        _mint(addr4, 2500000 * (10 ** 18));
 
-        address investManager = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
-        address communityManager = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-//        address newOwner = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
-
-        uint256 inGameAirdrop = 3 * _million * _decimalFactor;
-        uint256 rechargeDex = inGameAirdrop; // same as to use in game, airdrops: 3 million tokens
-        uint256 teamAllocation = 1 * _million * _decimalFactor;
-        uint256 investment = teamAllocation;    // same as team allocation: 1 million tokens
-        uint256 communityBounty = 750000 * _decimalFactor;  // 750,000 tokens
-        uint256 inGameReserve = 1250000 * _decimalFactor; // reserve for the next 5 years.
-
-        _mint(inGameAirdropper, inGameAirdrop);
-        _mint(rechargeDexManager, rechargeDex);
-        _mint(teamManager, teamAllocation);
-        _mint(investManager, investment);
-        _mint(communityManager, communityBounty);
-        _mint(newOwner, inGameReserve);
-
-        transferOwnership(newOwner);
+        transferOwnership(addr1);
     }
 
     // Dividends from recharged Tokens

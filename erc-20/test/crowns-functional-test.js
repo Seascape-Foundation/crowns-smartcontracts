@@ -12,7 +12,12 @@ config({
   contracts: {
     deploy: {
       Crowns: {
-        args: [ '$accounts[0]' ],
+        args: [
+          '$accounts[0]',
+          '$accounts[7]',
+          '$accounts[8]',
+          '$accounts[9]'
+        ],
       },
     }
   }

@@ -28,7 +28,6 @@ export const addressToPreAllocatedTokensMap = {
 export const calculateDividend = async ({
   token,
   address,
-
 }) => {
   const balance = new BigNumber(
     (await token.methods.balanceOf(address).call())
