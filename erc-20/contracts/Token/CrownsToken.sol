@@ -101,6 +101,11 @@ contract Crowns is Context, IERC20, Ownable {
             _accounts[account].balance = _accounts[account].balance.add(owing);
             _accounts[account].lastDividends = totalDividends;
             unClaimedDividends = unClaimedDividends.sub(owing);
+              emit Transfer(
+                  address(0),
+                  account,
+                  owing
+              );
           } else {
               _accounts[account].lastDividends = totalDividends;
           }
