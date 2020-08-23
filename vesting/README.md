@@ -1,2 +1,0 @@
-# vesting
-Vesting Smartcontract
