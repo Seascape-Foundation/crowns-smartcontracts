@@ -3,8 +3,8 @@ Official currency of BLOCKLORDS, The first online grand strategy game designed a
 It's an ERC-20 Token on Ethereum blockchain.
 
 # online usage
-To play with contracts online, you can use the gist code https://gist.github.com/ahmetson/d16219949c0c2aa311e9db4ed2ef7967 on Remix,
-the online Smartcontract development environment: https://remix.ethereum.org/#version=soljson-v0.6.7+commit.b8d736ae.js&optimize=false&gist=d16219949c0c2aa311e9db4ed2ef7967
+To play with contracts online, you can use the gist code https://gist.github.com/ahmetson/7828f7ae8409c3f8c15efcb3e4dd6c16 on Remix,
+the online Smartcontract development environment: https://remix.ethereum.org/#version=soljson-v0.6.7+commit.b8d736ae.js&optimize=false&gist=7828f7ae8409c3f8c15efcb3e4dd6c16
 
 # rinkeby contract addresses:
 *ERC-20 Crowns* - `0x8c9f6a021039ccbe98451918db6EE629368aD600`, owned by `0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B`
