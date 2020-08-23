@@ -95,7 +95,7 @@ contract Crowns is Context, IERC20, Ownable {
       _;
     }
 
-    function explicityUpdate(address account) public onlyOwner() {
+    function explicitlyUpdate(address account) public onlyOwner() {
         uint256 owing = dividendsOwing(account);
           if(owing > 0) {
             _accounts[account].balance = _accounts[account].balance.add(owing);
