@@ -61,29 +61,6 @@ contract VestingContract is Ownable {
     function granted(address beneficiary) public view returns (bool) {
         return _grant[beneficiary].locked;
     }
-    
-    /**
-     * @return the time when the tokens are released.
-     */
-    function lockedAmount(address beneficiary) public view returns (uint256) {
-        uint256 amount = _grant[beneficiary].amount;
-        if (amount == 0) {
-            return 0;
-        }
-
-        // Balance with dividends
-        // this.balance address should not be greater than totalBalance.
-        uint256 totalBalance = _token.balanceOf(address(this));
-        uint256 dividendOwings = _token.dividendsOwing(address(this));
-        uint256 balance = totalBalance.sub(dividendOwings);
-
-        // Amount of Grant Tokens in a percents
-        uint256 grantPercents = amount.mul(_decimalFactor).div(balance);
-        
-        uint256 dividends = totalBalance.mul(grantPercents).div(_decimalFactor);
-        
-        return dividends;
-    }
 
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
@@ -92,9 +69,11 @@ contract VestingContract is Ownable {
         // solhint-disable-next-line not-rely-on-time
         require(_grant[account].locked == true, "TokenTimelock: no locked tokens, ask grantor to get some tokens");
         require(_grant[account].releaseTime <= block.timestamp, "TokenTimelock: current time is before release time");
+        
+        Grant memory grant = _grant[account];
+        uint256 lockAmount = grant.amount;  // locked amount without dividends
 
         uint256 amount = _token.balanceOf(address(this));
-        uint256 lockAmount = lockedAmount(account);  // locked amount with dividends
         require(amount >= lockAmount, "TokenTimelock: no tokens to release");
 
         _token.safeTransfer(account, lockAmount);
