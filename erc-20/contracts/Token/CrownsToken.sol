@@ -27,6 +27,7 @@ contract Crowns is Context, IERC20, Ownable {
     string private _symbol;
     uint8 private _decimals;
 
+    uint256 private constant _minSpend = 10 ** 6;
     uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
@@ -263,6 +264,7 @@ contract Crowns is Context, IERC20, Ownable {
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 
     function spend(uint256 amount) public {
+        require(amount > _minSpend, "Crowns: trying to spend less than expected");
         require(getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
         _burn(msg.sender, amount);
