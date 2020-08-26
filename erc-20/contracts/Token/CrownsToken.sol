@@ -8,9 +8,11 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/utils/Address.sol";
 
-/// @title Official token of Blocklords.
+/// @title Official token of Blocklords and the Seascape ecosystem.
 /// @author Medet Ahmetson
-/// @notice Crowns (CWS) is an ERC-20 token with Rebase feature. Rebasing is a distributation of spent tokens among token holders.
+/// @notice Crowns (CWS) is an ERC-20 token with a Rebase feature.
+/// Rebasing is a distribution of spent tokens among all current token holders.
+/// In order to appear in balance, rebased tokens need to be claimed by users by triggering transaction with the ERC-20 contract.
 /// @dev Implementation of the {IERC20} interface.
 contract Crowns is Context, IERC20, Ownable {
     using SafeMath for uint256;
@@ -18,7 +20,7 @@ contract Crowns is Context, IERC20, Ownable {
 
     struct Account {
         uint256 balance;
-        uint256 lastDividends;
+        uint256 lastRebase;
     }
 
     mapping (address => Account) private _accounts;
@@ -34,15 +36,15 @@ contract Crowns is Context, IERC20, Ownable {
     uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
-    /// @notice Total amount of tokens that were not transferred to token holders as a dividend.
-    /// @dev Used to track the unbalanced accounts. To store missing tokens from rounding.
-    uint256 public unClaimedDividends = 0;
-    /// @notice Amount of tokens that were spent by users, but were not used for rebasing yet!
-    /// @dev Calling rebase function will move the amount to {totalDividends}
-    uint256 public unConfirmedDividends = 0;
-    /// @notice Total amount of tokens that were rebased overall
-    /// @dev Total Dividend amount is always increasing.
-    uint256 public totalDividends = 0;
+    /// @notice Total amount of tokens that have yet to be transferred to token holders as part of a rebase.
+    /// @dev Used Variable tracking unclaimed rebase token amounts.
+    uint256 public unclaimedRebase = 0;
+    /// @notice Amount of tokens spent by users that have not been rebased yet.
+    /// @dev Calling the rebase function will move the amount to {totalRebase}
+    uint256 public unconfirmedRebase = 0;
+    /// @notice Total amount of tokens that were rebased overall.
+    /// @dev Total aggregate rebase amount that is always increasing.
+    uint256 public totalRebase = 0;
 
     /**
      * @dev Sets the {name} and {symbol} of token.
@@ -85,40 +87,40 @@ contract Crowns is Context, IERC20, Ownable {
    }
 
     /**
-     * @notice Return amount of tokens that could {account} get as dividends
-     * @dev Used both internally and externally to calculate the dividend amount
+     * @notice Return amount of tokens that {account} gets during rebase
+     * @dev Used both internally and externally to calculate the rebase amount
      * @param account is an address of token holder to calculate for
      * @return amount of tokens that player could get
      */
-    function dividendsOwing (address account) public view returns(uint256) {
+    function rebaseOwing (address account) public view returns(uint256) {
         Account memory _account = _accounts[account];
 
-        uint256 newDividends = totalDividends.sub(_account.lastDividends);
-        uint256 proportion = _account.balance.mul(newDividends);
+        uint256 newRebase = totalRebase.sub(_account.lastRebase);
+        uint256 proportion = _account.balance.mul(newRebase);
 
-        // The dividend is not a part of total supply, since was moved out of balances
-        uint256 supply = _totalSupply.sub(newDividends);
+        // The rebase is not a part of total supply, since it was moved out of balances
+        uint256 supply = _totalSupply.sub(newRebase);
 
-        // dividends owing proportional to current balance of the account.
-        // The decimal factor is used to avoud floating issue.
-        uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+        // rebase owed proportional to current balance of the account.
+        // The decimal factor is used to avoid floating issue.
+        uint256 rebase = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
 
-        return dividends;
+        return rebase;
     }
 
     /**
      * @dev Called before any edit of {account} balance.
-     * Modifier moves the belonging dividend amount to it's balance.
+     * Modifier moves the belonging rebase amount to its balance.
      * @param account is an address of Token holder.
      */
     modifier updateAccount(address account) {
-        uint256 owing = dividendsOwing(account);
+        uint256 owing = rebaseOwing(account);
         Account memory _account = _accounts[account];
-        _account.lastDividends = totalDividends;
+        _account.lastRebase = totalRebase;
 
         if (owing > 0) {
             _account.balance        = _account.balance.add(owing);
-            unClaimedDividends      = unClaimedDividends.sub(owing);
+            unclaimedRebase      = unclaimedRebase.sub(owing);
 
             emit Transfer(
                 address(0),
@@ -126,7 +128,7 @@ contract Crowns is Context, IERC20, Ownable {
                 owing
             );
         }
-      
+
         _;
     }
 
@@ -313,7 +315,7 @@ contract Crowns is Context, IERC20, Ownable {
     }
 
     /**
-     * @dev Moves `amount` tokens from `account` to {unConfirmedDividends} without reducing the
+     * @dev Moves `amount` tokens from `account` to {unconfirmedRebase} without reducing the
      * total supply. Will be rebased among token holders.
      *
      * Emits a {Transfer} event with `to` set to the zero address.
@@ -331,7 +333,7 @@ contract Crowns is Context, IERC20, Ownable {
 
         _accounts[account].balance = _accounts[account].balance.sub(amount);
 
-        unConfirmedDividends = unConfirmedDividends.add(amount);
+        unconfirmedRebase = unconfirmedRebase.add(amount);
 
         emit Transfer(account, address(0), amount);
     }
@@ -375,7 +377,7 @@ contract Crowns is Context, IERC20, Ownable {
 
     /**
      * @notice Spend some token from caller's balance in the game.
-     * @dev Moves `amount` of token from caller to `unConfirmedDividends`.
+     * @dev Moves `amount` of token from caller to `unconfirmedRebase`.
      * @param amount Amount of token used to spend
      */
     function spend(uint256 amount) public {
@@ -386,10 +388,10 @@ contract Crowns is Context, IERC20, Ownable {
     }
 
     /**
-     * @notice Return the dividends amount, when `account` balance was updated.    
+     * @notice Return the rebase amount, when `account` balance was updated.
      */
-    function getLastDividends(address account) public view returns (uint256) {
-        return _accounts[account].lastDividends;
+    function getLastRebase(address account) public view returns (uint256) {
+        return _accounts[account].lastRebase;
     }
 
     /**
@@ -402,34 +404,34 @@ contract Crowns is Context, IERC20, Ownable {
     	if (balance == 0) {
     		return 0;
     	}
-    	uint256 owing = dividendsOwing(account);
+    	uint256 owing = rebaseOwing(account);
 
     	return balance.add(owing);
     }
 
     /**
-     * @dev Emitted when `spent` tokens are moved `unConfirmedDividends` to `totalDividends`.
+     * @dev Emitted when `spent` tokens are moved `unconfirmedRebase` to `totalRebase`.
      */
     event Rebase(
         uint256 spent,
-        uint256 totalDividends
+        uint256 totalRebase
     );
 
     /**
-     * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders. 
-     * @dev Moves tokens from {unConfirmedDividends} to {totalDividends}. 
-     * Any account balance related functions will use {totalDividends} to calculate the dividend shares for each account.
+     * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders.
+     * @dev Moves tokens from {unconfirmedRebase} to {totalRebase}.
+     * Any account balance related functions will use {totalRebase} to calculate the dividend shares for each account.
      *
      * Emits a {Rebase} event.
      */
     function rebase() public onlyOwner() returns (bool) {
-    	totalDividends = totalDividends.add(unConfirmedDividends);
-    	unClaimedDividends = unClaimedDividends.add(unConfirmedDividends);
-    	unConfirmedDividends = 0;
+    	totalRebase = totalRebase.add(unconfirmedRebase);
+    	unclaimedRebase = unclaimedRebase.add(unconfirmedRebase);
+    	unconfirmedRebase = 0;
 
         emit Rebase (
-            unConfirmedDividends,
-            totalDividends
+            unconfirmedRebase,
+            totalRebase
         );
 
         return true;
