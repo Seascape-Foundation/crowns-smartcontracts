@@ -1,11 +1,16 @@
 pragma solidity 0.6.7;
 
-import "./SafeCrown.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/token/ERC20/SafeERC20.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 
+/// @title Vesting Contract attached to Crowns (CWS) token.
+/// @author Medet Ahmetson
+/// @notice A simple contract to lock certain amount of Crowns (CWS) for a period.
+/// @dev Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/token/ERC20/TokenTimelock.sol 
 contract VestingContract is Ownable {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     struct Grant {
         bool locked;
@@ -13,8 +18,6 @@ contract VestingContract is Ownable {
         uint256 releaseTime;
     }
     
-    using SafeERC20 for IERC20;
-
     // ERC20 basic token contract being held
     IERC20 private _token;
 
