@@ -25,16 +25,23 @@ contract VestingContract is Ownable {
     
     uint256 private constant _decimalFactor = 10 ** 18;
 
+    /**
+     * @dev Sets Crowns (CWS) token address to interact with.
+     * Changes ownership, so the Contract deployer will not be the owner.
+     */
     constructor (IERC20 token, address newOwner) public {
         _token = token;
         
         transferOwnership(newOwner);
     }
     
-    function currentTime() public view returns (uint256) {
-        return block.timestamp;
-    }
-    
+    /**
+     * @notice Lock some tokens for a team member or investor.
+     * @dev Lock `amount` of Crowns (CWS) until `releaseTime`, after that tokens could be claimed by only `beneficiary`.
+     * Notice! only owner of Contract can call this function.
+     * Notice! also, contract should have enough token in balance.
+     * @param releaseTime is a Unix timestamp in seconds since 1 Jan. 1970.
+     */
     function lock(address beneficiary, uint256 amount, uint256 releaseTime) public onlyOwner() {
         require(releaseTime > block.timestamp, "TokenTimelock: release time is before current time");
         require(_grant[beneficiary].locked == false, "Has locked grant");
