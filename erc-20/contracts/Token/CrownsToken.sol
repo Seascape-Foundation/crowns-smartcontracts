@@ -8,6 +8,10 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/utils/Address.sol";
 
+/// @title Official token of Blocklords.
+/// @author Medet Ahmetson
+/// @notice Crowns (CWS) is an ERC-20 token with Rebase feature. Rebasing is a distributation of spent tokens among token holders.
+/// @dev Implementation of the {IERC20} interface.
 contract Crowns is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
@@ -18,7 +22,6 @@ contract Crowns is Context, IERC20, Ownable {
     }
 
     mapping (address => Account) private _accounts;
-
     mapping (address => mapping (address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
@@ -31,87 +34,103 @@ contract Crowns is Context, IERC20, Ownable {
     uint256 private constant _decimalFactor = 10 ** 18;
     uint256 private constant _million = 1000000;
 
-   constructor () public {
-       _name = "Crowns";
-       _symbol = "CWS";
-       _decimals = 18;
-
-       // Grant the minter role to a specified account
-       address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
-       address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
-       address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
-       address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
-       address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-       address newOwner             = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
-
-       uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
-       uint256 rechargeDex          = inGameAirdrop; // same as to use in game, airdrops: 3 million tokens
-       uint256 teamAllocation       = 1 * _million * _decimalFactor;
-       uint256 investment           = teamAllocation;    // same as team allocation: 1 million tokens
-       uint256 communityBounty      = 750000 * _decimalFactor;  // 750,000 tokens
-       uint256 inGameReserve        = 1250000 * _decimalFactor; // reserve for the next 5 years.
-
-       _mint(inGameAirdropper,      inGameAirdrop);
-       _mint(rechargeDexManager,    rechargeDex);
-       _mint(teamManager,           teamAllocation);
-       _mint(investManager,         investment);
-       _mint(communityManager,      communityBounty);
-       _mint(newOwner,              inGameReserve);
-
-       transferOwnership(newOwner);
-   }
-
-    // Dividends from recharged Tokens
+    /// @notice Total amount of tokens that were not transferred to token holders as a dividend.
+    /// @dev Used to track the unbalanced accounts. To store missing tokens from rounding.
     uint256 public unClaimedDividends = 0;
+    /// @notice Amount of tokens that were spent by users, but were not used for rebasing yet!
+    /// @dev Calling rebase function will move the amount to {totalDividends}
     uint256 public unConfirmedDividends = 0;
+    /// @notice Total amount of tokens that were rebased overall
+    /// @dev Total Dividend amount is always increasing.
     uint256 public totalDividends = 0;
 
+    /**
+     * @dev Sets the {name} and {symbol} of token.
+     * Initializes {decimals} with a default value of 18.
+     * Mints all tokens.
+     * Transfers ownership to another account. So, the token creator will not be counted as an owner.
+     */
+    constructor () public {
+        _name = "Crowns";
+        _symbol = "CWS";
+        _decimals = 18;
+
+        // Grant the minter roles to a specified account
+        address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
+        address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
+        address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
+        address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
+        address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
+        address newOwner             = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+
+        // 3 million tokens
+        uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
+        uint256 rechargeDex          = inGameAirdrop;
+        // 1 million tokens
+        uint256 teamAllocation       = 1 * _million * _decimalFactor;
+        uint256 investment           = teamAllocation;
+        // 750,000 tokens
+        uint256 communityBounty      = 750000 * _decimalFactor;
+        // 1,25 million tokens
+        uint256 inGameReserve        = 1250000 * _decimalFactor; // reserve for the next 5 years.
+
+        _mint(inGameAirdropper,      inGameAirdrop);
+        _mint(rechargeDexManager,    rechargeDex);
+        _mint(teamManager,           teamAllocation);
+        _mint(investManager,         investment);
+        _mint(communityManager,      communityBounty);
+        _mint(newOwner,              inGameReserve);
+
+        transferOwnership(newOwner);
+   }
+
+    /**
+     * @notice Return amount of tokens that could {account} get as dividends
+     * @dev Used both internally and externally to calculate the dividend amount
+     * @param account is an address of token holder to calculate for
+     * @return amount of tokens that player could get
+     */
     function dividendsOwing (address account) public view returns(uint256) {
-      uint256 newDividends = totalDividends.sub(_accounts[account].lastDividends);
-      uint256 proportion = _accounts[account].balance.mul(newDividends);
+        Account memory _account = _accounts[account];
 
-      // dividends owing proportional to current balance of the account.
-      // The dividend is not a part of total supply, since was moved out of balances
-      uint256 supply = _totalSupply.sub(newDividends);
-      uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+        uint256 newDividends = totalDividends.sub(_account.lastDividends);
+        uint256 proportion = _account.balance.mul(newDividends);
 
-      return dividends;
+        // The dividend is not a part of total supply, since was moved out of balances
+        uint256 supply = _totalSupply.sub(newDividends);
+
+        // dividends owing proportional to current balance of the account.
+        // The decimal factor is used to avoud floating issue.
+        uint256 dividends = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+
+        return dividends;
     }
 
+    /**
+     * @dev Called before any edit of {account} balance.
+     * Modifier moves the belonging dividend amount to it's balance.
+     * @param account is an address of Token holder.
+     */
     modifier updateAccount(address account) {
-      uint256 owing = dividendsOwing(account);
-      if(owing > 0) {
-        _accounts[account].balance = _accounts[account].balance.add(owing);
-        _accounts[account].lastDividends = totalDividends;
-        unClaimedDividends = unClaimedDividends.sub(owing);
-        emit Transfer(
-            address(0),
-            account,
-            owing
-        );
-      } else {
-          _accounts[account].lastDividends = totalDividends;
-      }
-      _;
-    }
-
-    function explicitlyUpdate(address account) public onlyOwner() {
         uint256 owing = dividendsOwing(account);
-          if(owing > 0) {
-            _accounts[account].balance = _accounts[account].balance.add(owing);
-            _accounts[account].lastDividends = totalDividends;
-            unClaimedDividends = unClaimedDividends.sub(owing);
-              emit Transfer(
-                  address(0),
-                  account,
-                  owing
-              );
-          } else {
-              _accounts[account].lastDividends = totalDividends;
-          }
+        Account memory _account = _accounts[account];
+        _account.lastDividends = totalDividends;
+
+        if (owing > 0) {
+            _account.balance        = _account.balance.add(owing);
+            unClaimedDividends      = unClaimedDividends.sub(owing);
+
+            emit Transfer(
+                address(0),
+                account,
+                owing
+            );
+        }
+      
+        _;
     }
 
-        /**
+    /**
      * @dev Returns the name of the token.
      */
     function name() public view returns (string memory) {
@@ -139,68 +158,132 @@ contract Crowns is Context, IERC20, Ownable {
         return _decimals;
     }
 
-
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
     function totalSupply() public view override returns (uint256) {
         return _totalSupply;
     }
 
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
     function balanceOf(address account) public view override returns (uint256) {
-        return getBalance(account);
+        return _getBalance(account);
     }
 
     /**
-     * Requirements:
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
      *
-     * - `recipient` cannot be the zero address.
-     * - the caller must have a balance of at least `amount`.
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
      */
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
 
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
 
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
 
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
 
+    /**
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     */
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
         return true;
     }
+
+    /**
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+     *
+     * This is an alternative to {approve} that can be used as a mitigation for
+     * problems described in {IERC20-approve}.
+     *
+     * Emits an {Approval} event indicating the updated allowance.
+     *
+     * Requirements:
+     *
+     * - `spender` cannot be the zero address.
+     * - `spender` must have allowance for the caller of at least
+     * `subtractedValue`.
+     */
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
     }
 
-    function getLastDividends(address addr) public view returns (uint256) {
-        return _accounts[addr].lastDividends;
-    }
-
-    function getBalance(address addr) private view returns (uint256) {
-        uint256 balance = _accounts[addr].balance;
-    	if (balance == 0) {
-    		return 0;
-    	}
-    	uint256 owing = dividendsOwing(addr);
-    	return balance.add(owing);
-    }
-
+    /**
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+     *
+     * This is internal function is equivalent to {transfer}, and can be used to
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+     *
+     * Emits a {Transfer} event.
+     *
+     * Requirements:
+     *
+     * - `sender` cannot be the zero address.
+     * - `recipient` cannot be the zero address.
+     * - `sender` must have a balance of at least `amount`.
+     */
     function _transfer(address sender, address recipient, uint256 amount) internal updateAccount(sender) updateAccount(recipient) virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Can not send 0 token");
-        require(getBalance(sender) >= amount, "ERC20: Not enough token to send");
+        require(_getBalance(sender) >= amount, "ERC20: Not enough token to send");
 
         _beforeTokenTransfer(sender, recipient, amount);
 
@@ -230,8 +313,8 @@ contract Crowns is Context, IERC20, Ownable {
     }
 
     /**
-     * @dev Destroys `amount` tokens from `account`, reducing the
-     * total supply.
+     * @dev Moves `amount` tokens from `account` to {unConfirmedDividends} without reducing the
+     * total supply. Will be rebased among token holders.
      *
      * Emits a {Transfer} event with `to` set to the zero address.
      *
@@ -242,7 +325,7 @@ contract Crowns is Context, IERC20, Ownable {
      */
     function _burn(address account, uint256 amount) internal updateAccount(account) virtual {
         require(account != address(0), "ERC20: burn from the zero address");
-        require(getBalance(account) >= amount, "ERC20: Not enough token to burn");
+        require(_getBalance(account) >= amount, "ERC20: Not enough token to burn");
 
         _beforeTokenTransfer(account, address(0), amount);
 
@@ -253,6 +336,19 @@ contract Crowns is Context, IERC20, Ownable {
         emit Transfer(account, address(0), amount);
     }
 
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+     *
+     * This is internal function is equivalent to `approve`, and can be used to
+     * e.g. set automatic allowances for certain subsystems, etc.
+     *
+     * Emits an {Approval} event.
+     *
+     * Requirements:
+     *
+     * - `owner` cannot be the zero address.
+     * - `spender` cannot be the zero address.
+     */
     function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
@@ -261,35 +357,81 @@ contract Crowns is Context, IERC20, Ownable {
         emit Approval(owner, spender, amount);
     }
 
+    /**
+     * @dev Hook that is called before any transfer of tokens. This includes
+     * minting and burning.
+     *
+     * Calling conditions:
+     *
+     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
+     * will be to transferred to `to`.
+     * - when `from` is zero, `amount` tokens will be minted for `to`.
+     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
+     * - `from` and `to` are never both zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 
+    /**
+     * @notice Spend some token from caller's balance in the game.
+     * @dev Moves `amount` of token from caller to `unConfirmedDividends`.
+     * @param amount Amount of token used to spend
+     */
     function spend(uint256 amount) public {
         require(amount > _minSpend, "Crowns: trying to spend less than expected");
-        require(getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
+        require(_getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
         _burn(msg.sender, amount);
     }
 
-    event DividendDropped(
-        uint256 unclaimedDividends,
+    /**
+     * @notice Return the dividends amount, when `account` balance was updated.    
+     */
+    function getLastDividends(address account) public view returns (uint256) {
+        return _accounts[account].lastDividends;
+    }
+
+    /**
+     * @dev Returns actual balance of account as a sum of owned divends and current balance.
+     * @param account Address of Token holder.
+     * @return Token amount
+     */
+    function _getBalance(address account) private view returns (uint256) {
+        uint256 balance = _accounts[account].balance;
+    	if (balance == 0) {
+    		return 0;
+    	}
+    	uint256 owing = dividendsOwing(account);
+
+    	return balance.add(owing);
+    }
+
+    /**
+     * @dev Emitted when `spent` tokens are moved `unConfirmedDividends` to `totalDividends`.
+     */
+    event Rebase(
+        uint256 spent,
         uint256 totalDividends
     );
 
     /**
-     * Warning, no validation!
-     * dropDividend changes balance of all token owners.
-     * @param  {[type]} amount [description]
-     * @return {[type]}        [description]
+     * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders. 
+     * @dev Moves tokens from {unConfirmedDividends} to {totalDividends}. 
+     * Any account balance related functions will use {totalDividends} to calculate the dividend shares for each account.
+     *
+     * Emits a {Rebase} event.
      */
-    function dropDividend() public onlyOwner() returns (bool) {
+    function rebase() public onlyOwner() returns (bool) {
     	totalDividends = totalDividends.add(unConfirmedDividends);
     	unClaimedDividends = unClaimedDividends.add(unConfirmedDividends);
     	unConfirmedDividends = 0;
 
-        emit DividendDropped(
-            unClaimedDividends,
+        emit Rebase (
+            unConfirmedDividends,
             totalDividends
         );
+
         return true;
     }
 }
