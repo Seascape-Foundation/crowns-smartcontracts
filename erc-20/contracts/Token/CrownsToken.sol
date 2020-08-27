@@ -115,12 +115,11 @@ contract Crowns is Context, IERC20, Ownable {
      */
     modifier updateAccount(address account) {
         uint256 owing = rebaseOwing(account);
-        Account memory _account = _accounts[account];
-        _account.lastRebase = totalRebase;
+        _accounts[account].lastRebase = totalRebase;
 
         if (owing > 0) {
-            _account.balance        = _account.balance.add(owing);
-            unclaimedRebase      = unclaimedRebase.sub(owing);
+            _accounts[account].balance    = _accounts[account].balance.add(owing);
+            unclaimedRebase     = unclaimedRebase.sub(owing);
 
             emit Transfer(
                 address(0),
