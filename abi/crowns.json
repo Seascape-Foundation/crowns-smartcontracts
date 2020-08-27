@@ -33,25 +33,6 @@
 		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "unclaimedDividends",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "totalDividends",
-				"type": "uint256"
-			}
-		],
-		"name": "DividendDropped",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "previousOwner",
@@ -65,6 +46,25 @@
 			}
 		],
 		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "spent",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalRebase",
+				"type": "uint256"
+			}
+		],
+		"name": "Rebase",
 		"type": "event"
 	},
 	{
@@ -204,52 +204,7 @@
 				"type": "address"
 			}
 		],
-		"name": "dividendsOwing",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "dropDividend",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "explicitlyUpdate",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "addr",
-				"type": "address"
-			}
-		],
-		"name": "getLastDividends",
+		"name": "getLastRebase",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -312,6 +267,38 @@
 	},
 	{
 		"inputs": [],
+		"name": "rebase",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "rebaseOwing",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "renounceOwnership",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -345,7 +332,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "totalDividends",
+		"name": "totalRebase",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -437,7 +424,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "unClaimedDividends",
+		"name": "unclaimedRebase",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -450,7 +437,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "unConfirmedDividends",
+		"name": "unconfirmedRebase",
 		"outputs": [
 			{
 				"internalType": "uint256",
