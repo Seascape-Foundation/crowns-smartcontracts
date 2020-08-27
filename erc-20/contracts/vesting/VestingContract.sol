@@ -80,8 +80,7 @@ contract VestingContract is Ownable {
         require(_grant[account].locked == true, "TokenTimelock: no locked tokens, ask grantor to get some tokens");
         require(_grant[account].releaseTime <= block.timestamp, "TokenTimelock: current time is before release time");
 
-        Grant memory grant = _grant[account];
-        uint256 lockAmount = grant.amount;  // locked amount without rebase
+        uint256 lockAmount =  _grant[account].amount;  // locked amount without rebase
 
         uint256 amount = _token.balanceOf(address(this));
         require(amount >= lockAmount, "TokenTimelock: no tokens to release");
