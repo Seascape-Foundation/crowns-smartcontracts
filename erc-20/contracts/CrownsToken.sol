@@ -2,11 +2,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.7;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/GSN/Context.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/token/ERC20/IERC20.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/utils/Address.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/access/Ownable.sol";
+import "./Ownable.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/GSN/Context.sol";
+import "./Context.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/token/ERC20/IERC20.sol";
+import "./IERC20.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/math/SafeMath.sol";
+import "./SafeMath.sol";
+//import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contracts/utils/Address.sol";
+import "./Address.sol";
 
 /// @title Official token of Blocklords and the Seascape ecosystem.
 /// @author Medet Ahmetson
@@ -58,12 +63,12 @@ contract Crowns is Context, IERC20, Ownable {
         _decimals = 18;
 
         // Grant the minter roles to a specified account
-        address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
-        address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
-        address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
-        address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
-        address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-        address newOwner             = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+        address inGameAirdropper     = 0x8D951f95DAAb9d2189A16d8A0D44E10ed7161709;
+        address rechargeDexManager   = 0x135E159C28618171aeE2953d251052B1D3337Aa2;
+        address teamManager          = 0x6b7A04061B963B8293a9E574419686a14717251c;
+        address investManager        = 0xf5BA233F75249a6276254B475f84FA6931Df6b49;
+        address communityManager     = 0x2f1a5D1A1A76e8FC182A84013534E994423BAb94;
+        address newOwner             = 0x5BdE62850277F9237A1aF36ffAC5873F01A478B1;
 
         // 3 million tokens
         uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
