@@ -14,7 +14,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.1.0/contr
 /// Rebasing is a distribution of spent tokens among all current token holders.
 /// In order to appear in balance, rebased tokens need to be claimed by users by triggering transaction with the ERC-20 contract.
 /// @dev Implementation of the {IERC20} interface.
-contract Crowns is Context, IERC20, Ownable {
+contract CrownsToken is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
