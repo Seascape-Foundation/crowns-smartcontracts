@@ -1,0 +1,19 @@
+version: "3.2"
+
+services:
+  crowns:
+    build:
+      context: ./
+    container_name: "crowns"
+    volumes:
+      - type: bind
+        source: ./erc-20/
+        target: /home/node/app/
+    ports:
+      - "8001:8000"
+    networks:
+      - crowns-net
+    entrypoint: sh
+    command: '-c "sleep 1d"'
+networks:
+  crowns-net:
