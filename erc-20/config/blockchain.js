@@ -11,7 +11,13 @@ module.exports = {
     client: 'ganache-cli',
     clientConfig: {
       miningMode: 'dev' // Mode in which the node mines. Options: dev, auto, always, off
-    }
+    },
+      accounts: [
+	  {
+	      nodeAccounts: true,
+	      numAddresses: 1
+	  }
+      ]
   },
 
   privatenet: {

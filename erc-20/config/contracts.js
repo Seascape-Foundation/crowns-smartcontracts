@@ -43,7 +43,23 @@ module.exports = {
       "ws://localhost:8546",
       "http://localhost:8545",
       "$WEB3"  // uses pre existing web3 object if available (e.g in Mist)
-    ]
+    ],
+    deploy: {
+        CrownsToken: {
+            from: process.env.ADDRESS_1,
+            args: [ ],
+            gas: '3000000',
+            gasPrice: '20 gwei',
+            address: process.env.CROWNS  // previously deployed token's address
+	},
+	VestingContract: {
+	    from: process.env.ADDRESS_1,
+	    args: [process.env.CROWNS, process.env.ADDRESS_1],
+	    gas: '3000000',
+	    gasPrice: '20 gwei',
+	    address: process.env.VESTING
+	}
+    }
   },
 
   // merges with the settings in default
