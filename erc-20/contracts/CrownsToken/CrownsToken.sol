@@ -63,7 +63,7 @@ contract CrownsToken is Context, IERC20, Ownable {
         address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
         address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
         address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-        address newOwner             = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+        address newOwner             = msg.sender;
 
         // 3 million tokens
         uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
