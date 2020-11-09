@@ -379,11 +379,14 @@ contract CrownsToken is Context, IERC20, Ownable {
      * @dev Moves `amount` of token from caller to `unconfirmedRebase`.
      * @param amount Amount of token used to spend
      */
-    function spend(uint256 amount) public {
+    function spend(uint256 amount) public returns(bool) {
         require(amount > _minSpend, "Crowns: trying to spend less than expected");
         require(_getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
         _burn(msg.sender, amount);
+
+	return true;
+    }
     }
 
     /**
