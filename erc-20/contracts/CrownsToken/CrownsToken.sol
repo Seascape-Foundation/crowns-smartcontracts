@@ -387,6 +387,15 @@ contract CrownsToken is Context, IERC20, Ownable {
 
 	return true;
     }
+
+    function spendFrom(address sender, uint256 amount) public returns(bool) {
+	require(amount > _minSpend, "Crowns: trying to spend less than expected");
+	require(_getBalance(sender) >= amount, "Crowns: not enough balance");
+
+	_burn(sender, amount);
+	_approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+
+	return true;
     }
 
     /**
