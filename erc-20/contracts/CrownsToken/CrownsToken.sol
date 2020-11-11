@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.7;
 
-import "./../../openzeppelin/contracts/access/Ownable.sol";
-import "./../../openzeppelin/contracts/GSN/Context.sol";
-import "./../../openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./../../openzeppelin/contracts/math/SafeMath.sol";
-import "./../../openzeppelin/contracts/utils/Address.sol";
+import "./../openzeppelin/contracts/access/Ownable.sol";
+import "./../openzeppelin/contracts/GSN/Context.sol";
+import "./../openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./../openzeppelin/contracts/math/SafeMath.sol";
+import "./../openzeppelin/contracts/utils/Address.sol";
 
 /// @title Official token of Blocklords and the Seascape ecosystem.
 /// @author Medet Ahmetson
@@ -63,7 +63,7 @@ contract CrownsToken is Context, IERC20, Ownable {
         address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
         address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
         address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-        address newOwner             = 0x084b488B3cC68E9aECaCE8ABbe91E72D2Ff57C9B;
+        address newOwner             = msg.sender;
 
         // 3 million tokens
         uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
@@ -379,11 +379,23 @@ contract CrownsToken is Context, IERC20, Ownable {
      * @dev Moves `amount` of token from caller to `unconfirmedRebase`.
      * @param amount Amount of token used to spend
      */
-    function spend(uint256 amount) public {
+    function spend(uint256 amount) public returns(bool) {
         require(amount > _minSpend, "Crowns: trying to spend less than expected");
         require(_getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
         _burn(msg.sender, amount);
+
+	return true;
+    }
+
+    function spendFrom(address sender, uint256 amount) public returns(bool) {
+	require(amount > _minSpend, "Crowns: trying to spend less than expected");
+	require(_getBalance(sender) >= amount, "Crowns: not enough balance");
+
+	_burn(sender, amount);
+	_approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
+
+	return true;
     }
 
     /**
