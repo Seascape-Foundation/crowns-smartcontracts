@@ -19,17 +19,19 @@ contract VestingContract is Ownable {
     }
 
     // ERC20 basic token contract being held
-    IERC20 private _token;
+    IERC20 private immutable _token;
 
     mapping (address => Grant) public _grant;
 
-    uint256 private constant _decimalFactor = 10 ** 18;
-
+    event Locked(address indexed beneficiary, uint256 amount, uint256 releaseTime);
+    event Released(address indexed beneficiary, uint256 amount);
+    
     /**
      * @dev Sets Crowns (CWS) token address to interact with.
      * Changes ownership, so the Contract deployer will not be the owner.
      */
     constructor (IERC20 token, address newOwner) public {
+	require(token != address(0), "Vecting: Token address can not be zero");
         _token = token;
 
         transferOwnership(newOwner);
@@ -42,49 +44,51 @@ contract VestingContract is Ownable {
      * Notice! also, contract should have enough token in balance in order to work.
      * @param releaseTime is a Unix timestamp in seconds since 1 Jan. 1970.
      */
-    function lock(address beneficiary, uint256 amount, uint256 releaseTime) public onlyOwner() {
+    function lock(address beneficiary, uint256 amount, uint256 releaseTime) external onlyOwner() {
         require(releaseTime > block.timestamp, "TokenTimelock: release time is before current time");
         require(_grant[beneficiary].locked == false, "Has locked grant");
         require(amount > 0, "TokenTimelock: can't lock 0 token");
 
         Grant memory grant = Grant(true, amount, releaseTime);
         _grant[beneficiary] = grant;
+
+	emit Locked(beneficiary, amount, releaseTime);
     }
 
     /**
      * @return the token being held.
      */
-    function token() public view returns (IERC20) {
+    function token() external view returns (IERC20) {
         return _token;
     }
 
     /**
      * @return the time when the tokens are released.
      */
-    function releaseTime(address beneficiary) public view returns (uint256) {
+    function releaseTime(address beneficiary) external view returns (uint256) {
         return _grant[beneficiary].releaseTime;
     }
 
     /**
      * @notice Check whether given {beneficiary} was granted by token or not.
      */
-    function isLocked(address beneficiary) public view returns (bool) {
+    function isLocked(address beneficiary) external view returns (bool) {
         return _grant[beneficiary].locked;
     }
 
     /**
      * @notice Return locked token amount for the {beneficiary}
      */
-    function lockedAmount(address beneficiary) public view returns (uint256) {
+    function lockedAmount(address beneficiary) external view returns (uint256) {
         return _grant[beneficiary].amount;
     }
 
     /**
      * @notice Transfers tokens held by timelock to beneficiary.
      */
-    function release(address account) public virtual {
+    function release(address account) external virtual {
         // solhint-disable-next-line not-rely-on-time
-        require(_grant[account].locked == true, "TokenTimelock: no locked tokens, ask grantor to get some tokens");
+        require(_grant[account].locked, "TokenTimelock: no locked tokens, ask grantor to get some tokens");
         require(_grant[account].releaseTime <= block.timestamp, "TokenTimelock: current time is before release time");
 
         uint256 lockAmount =  _grant[account].amount;  // locked amount without rebase
@@ -97,5 +101,7 @@ contract VestingContract is Ownable {
         _grant[account].locked = false;
         _grant[account].amount = 0;
         _grant[account].releaseTime = 0;
+
+	emit Released(account, lockAmount);
     }
 }

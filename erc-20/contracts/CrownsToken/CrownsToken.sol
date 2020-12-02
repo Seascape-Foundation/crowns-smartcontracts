@@ -28,13 +28,13 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    string private immutable _name;
+    string private immutable _symbol;
+    uint8 private immutable _decimals;
 
-    uint256 private constant _minSpend = 10 ** 6;
-    uint256 private constant _decimalFactor = 10 ** 18;
-    uint256 private constant _million = 1000000;
+    uint256 private constant MIN_SPEND = 10 ** 6;
+    uint256 private constant SCALER = 10 ** 18;
+
 
     /// @notice Total amount of tokens that have yet to be transferred to token holders as part of a rebase.
     /// @dev Used Variable tracking unclaimed rebase token amounts.
@@ -46,6 +46,17 @@ contract CrownsToken is Context, IERC20, Ownable {
     /// @dev Total aggregate rebase amount that is always increasing.
     uint256 public totalRebase = 0;
 
+    
+    /**
+     * @dev Emitted when `spent` tokens are moved `unconfirmedRebase` to `totalRebase`.
+     */
+    event Rebase(
+        uint256 spent,
+        uint256 totalRebase
+    );
+
+   
+
     /**
      * @dev Sets the {name} and {symbol} of token.
      * Initializes {decimals} with a default value of 18.
@@ -56,7 +67,7 @@ contract CrownsToken is Context, IERC20, Ownable {
         _name = "Crowns";
         _symbol = "CWS";
         _decimals = 18;
-
+    
         // Grant the minter roles to a specified account
         address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
         address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
@@ -66,15 +77,15 @@ contract CrownsToken is Context, IERC20, Ownable {
         address newOwner             = msg.sender;
 
         // 3 million tokens
-        uint256 inGameAirdrop        = 3 * _million * _decimalFactor;
+        uint256 inGameAirdrop        = 3e6 * SCALER;
         uint256 rechargeDex          = inGameAirdrop;
         // 1 million tokens
-        uint256 teamAllocation       = 1 * _million * _decimalFactor;
+        uint256 teamAllocation       = 1e6 * SCALER;
         uint256 investment           = teamAllocation;
         // 750,000 tokens
-        uint256 communityBounty      = 750000 * _decimalFactor;
+        uint256 communityBounty      = 750000 * SCALER;
         // 1,25 million tokens
-        uint256 inGameReserve        = 1250000 * _decimalFactor; // reserve for the next 5 years.
+        uint256 inGameReserve        = 1250000 * SCALER; // reserve for the next 5 years.
 
         _mint(inGameAirdropper,      inGameAirdrop);
         _mint(rechargeDexManager,    rechargeDex);
@@ -380,7 +391,7 @@ contract CrownsToken is Context, IERC20, Ownable {
      * @param amount Amount of token used to spend
      */
     function spend(uint256 amount) public returns(bool) {
-        require(amount > _minSpend, "Crowns: trying to spend less than expected");
+        require(amount > MIN_SPEND, "Crowns: trying to spend less than expected");
         require(_getBalance(msg.sender) >= amount, "Crowns: Not enough balance");
 
         _burn(msg.sender, amount);
@@ -389,7 +400,7 @@ contract CrownsToken is Context, IERC20, Ownable {
     }
 
     function spendFrom(address sender, uint256 amount) public returns(bool) {
-	require(amount > _minSpend, "Crowns: trying to spend less than expected");
+	require(amount > MIN_SPEND, "Crowns: trying to spend less than expected");
 	require(_getBalance(sender) >= amount, "Crowns: not enough balance");
 
 	_burn(sender, amount);
@@ -419,14 +430,6 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     	return balance.add(owing);
     }
-
-    /**
-     * @dev Emitted when `spent` tokens are moved `unconfirmedRebase` to `totalRebase`.
-     */
-    event Rebase(
-        uint256 spent,
-        uint256 totalRebase
-    );
 
     /**
      * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders.
