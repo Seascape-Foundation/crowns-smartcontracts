@@ -9,6 +9,9 @@ services:
       - type: bind
         source: ./erc-20/
         target: /home/node/app/
+      - type: bind
+        source: ./openzeppelin/
+        target: /home/node/openzeppelin/
     ports:
       - "8001:8000"
     networks:
