@@ -28,8 +28,8 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     uint256 private _totalSupply;
 
-    string private immutable _name;
-    string private immutable _symbol;
+    string private _name;
+    string private _symbol;
     uint8 private immutable _decimals;
 
     uint256 private constant MIN_SPEND = 10 ** 6;
@@ -64,7 +64,7 @@ contract CrownsToken is Context, IERC20, Ownable {
      * Transfers ownership to another account. So, the token creator will not be counted as an owner.
      */
     constructor () public {
-        _name = "Crowns";
+        _name = "";
         _symbol = "CWS";
         _decimals = 18;
     
@@ -114,7 +114,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
         // rebase owed proportional to current balance of the account.
         // The decimal factor is used to avoid floating issue.
-        uint256 rebase = proportion.mul(_decimalFactor).div(supply).div(_decimalFactor);
+        uint256 rebase = proportion.mul(SCALER).div(supply).div(SCALER);
 
         return rebase;
     }

@@ -31,7 +31,7 @@ contract VestingContract is Ownable {
      * Changes ownership, so the Contract deployer will not be the owner.
      */
     constructor (IERC20 token, address newOwner) public {
-	require(token != address(0), "Vecting: Token address can not be zero");
+	require(address(token) != address(0), "Vecting: Token address can not be zero");
         _token = token;
 
         transferOwnership(newOwner);
