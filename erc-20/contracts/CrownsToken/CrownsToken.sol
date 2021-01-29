@@ -46,7 +46,7 @@ contract CrownsToken is Context, IERC20, Ownable {
     /// @dev Total aggregate rebase amount that is always increasing.
     uint256 public totalRebase = 0;
 
-    
+
     /**
      * @dev Emitted when `spent` tokens are moved `unconfirmedRebase` to `totalRebase`.
      */
@@ -55,7 +55,7 @@ contract CrownsToken is Context, IERC20, Ownable {
         uint256 totalRebase
     );
 
-   
+
 
     /**
      * @dev Sets the {name} and {symbol} of token.
@@ -67,14 +67,14 @@ contract CrownsToken is Context, IERC20, Ownable {
         _name = "";
         _symbol = "CWS";
         _decimals = 18;
-    
+
         // Grant the minter roles to a specified account
-        address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
-        address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
-        address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
-        address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
-        address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
-        address newOwner             = msg.sender;
+        address inGameAirdropper     = 0x2F8EAE5771E6100f27D6c382D37d990B4F59b3a2;
+        address rechargeDexManager   = 0xD70279EF7B2C83F8D6157219F832F1B00525DDcF;
+        address teamManager          = 0xc9603191b6933C97E7e66F5F68697Bb879f47e56;
+        address investManager        = 0x84EdD4C1ebc80243c0e8B5E6119c177838E35F0E;
+        address communityManager     = 0xB257aBb3A2F47eDF8f8E9CEb71D93A90E1050323;
+        address newOwner             = 0x522C2989f4Baafd93154356127412dd289Ed3378;
 
         // 3 million tokens
         uint256 inGameAirdrop        = 3e6 * SCALER;
