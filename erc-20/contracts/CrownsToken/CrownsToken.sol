@@ -10,9 +10,9 @@ import "./../openzeppelin/contracts/utils/Address.sol";
 
 /// @title Official token of Blocklords and the Seascape ecosystem.
 /// @author Medet Ahmetson
-/// @notice Crowns (CWS) is an ERC-20 token with a Rebase feature.
+/// @notice Crowns (CWS) is an ERC-20 token with a payWave feature.
 /// Rebasing is a distribution of spent tokens among all current token holders.
-/// In order to appear in balance, rebased tokens need to be claimed by users by triggering transaction with the ERC-20 contract.
+/// In order to appear in balance, payWaved tokens need to be claimed by users by triggering transaction with the ERC-20 contract.
 /// @dev Implementation of the {IERC20} interface.
 contract CrownsToken is Context, IERC20, Ownable {
     using SafeMath for uint256;
@@ -20,7 +20,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     struct Account {
         uint256 balance;
-        uint256 lastRebase;
+        uint256 lastPayWave;
     }
 
     mapping (address => Account) private _accounts;
@@ -36,26 +36,26 @@ contract CrownsToken is Context, IERC20, Ownable {
     uint256 private constant SCALER = 10 ** 18;
 
 
-    /// @notice Total amount of tokens that have yet to be transferred to token holders as part of a rebase.
-    /// @dev Used Variable tracking unclaimed rebase token amounts.
-    uint256 public unclaimedRebase = 0;
-    /// @notice Amount of tokens spent by users that have not been rebased yet.
-    /// @dev Calling the rebase function will move the amount to {totalRebase}
-    uint256 public unconfirmedRebase = 0;
-    /// @notice Total amount of tokens that were rebased overall.
-    /// @dev Total aggregate rebase amount that is always increasing.
-    uint256 public totalRebase = 0;
+    /// @notice Total amount of tokens that have yet to be transferred to token holders as part of a payWave.
+    /// @dev Used Variable tracking unclaimed payWave token amounts.
+    uint256 public unclaimedPayWave = 0;
+    /// @notice Amount of tokens spent by users that have not been payWaved yet.
+    /// @dev Calling the payWave function will move the amount to {totalPayWave}
+    uint256 public unconfirmedPayWave = 0;
+    /// @notice Total amount of tokens that were payWaved overall.
+    /// @dev Total aggregate payWave amount that is always increasing.
+    uint256 public totalPayWave = 0;
 
-    
+
     /**
-     * @dev Emitted when `spent` tokens are moved `unconfirmedRebase` to `totalRebase`.
+     * @dev Emitted when `spent` tokens are moved `unconfirmedPayWave` to `totalPayWave`.
      */
-    event Rebase(
+    event PayWave(
         uint256 spent,
-        uint256 totalRebase
+        uint256 totalPayWave
     );
 
-   
+
 
     /**
      * @dev Sets the {name} and {symbol} of token.
@@ -67,25 +67,25 @@ contract CrownsToken is Context, IERC20, Ownable {
         _name = "";
         _symbol = "CWS";
         _decimals = 18;
-    
+
         // Grant the minter roles to a specified account
-        address inGameAirdropper     = 0xFa4D7D1AC9b7a7454D09B8eAdc35aA70599329EA;
-        address rechargeDexManager   = 0x53bd91aEF5e84A61F9B87781A024ee648733f973;
-        address teamManager          = 0xB5de2b5186E1Edc947B73019F3102EF53c2Ac691;
-        address investManager        = 0x1D3Db9BCA5aa2CE931cE13B7B51f8E14F5895368;
-        address communityManager     = 0x0811e2DFb6482507461ca2Ab583844313f2549B5;
+        address inGameAirdropper     = 0x2F8EAE5771E6100f27D6c382D37d990B4F59b3a2;
+        address rechargeDexManager   = 0xD70279EF7B2C83F8D6157219F832F1B00525DDcF;
+        address teamManager          = 0xc9603191b6933C97E7e66F5F68697Bb879f47e56;
+        address investManager        = 0x84EdD4C1ebc80243c0e8B5E6119c177838E35F0E;
+        address communityManager     = 0xB257aBb3A2F47eDF8f8E9CEb71D93A90E1050323;
         address newOwner             = msg.sender;
 
         // 3 million tokens
-        uint256 inGameAirdrop        = 3e6 * SCALER;
-        uint256 rechargeDex          = inGameAirdrop;
+        uint256 inGameAirdrop        = 5e6 * SCALER;
+        uint256 rechargeDex          = 1e6 * SCALER;
         // 1 million tokens
         uint256 teamAllocation       = 1e6 * SCALER;
-        uint256 investment           = teamAllocation;
+        uint256 investment           = 1e6 * SCALER;
         // 750,000 tokens
-        uint256 communityBounty      = 750000 * SCALER;
+        uint256 communityBounty      = 500000 * SCALER;
         // 1,25 million tokens
-        uint256 inGameReserve        = 1250000 * SCALER; // reserve for the next 5 years.
+        uint256 inGameReserve        = 1500000 * SCALER; // reserve for the next 5 years.
 
         _mint(inGameAirdropper,      inGameAirdrop);
         _mint(rechargeDexManager,    rechargeDex);
@@ -98,39 +98,39 @@ contract CrownsToken is Context, IERC20, Ownable {
    }
 
     /**
-     * @notice Return amount of tokens that {account} gets during rebase
-     * @dev Used both internally and externally to calculate the rebase amount
+     * @notice Return amount of tokens that {account} gets during payWave
+     * @dev Used both internally and externally to calculate the payWave amount
      * @param account is an address of token holder to calculate for
      * @return amount of tokens that player could get
      */
-    function rebaseOwing (address account) public view returns(uint256) {
+    function payWaveOwing (address account) public view returns(uint256) {
         Account memory _account = _accounts[account];
 
-        uint256 newRebase = totalRebase.sub(_account.lastRebase);
-        uint256 proportion = _account.balance.mul(newRebase);
+        uint256 newPayWave = totalPayWave.sub(_account.lastPayWave);
+        uint256 proportion = _account.balance.mul(newPayWave);
 
-        // The rebase is not a part of total supply, since it was moved out of balances
-        uint256 supply = _totalSupply.sub(newRebase);
+        // The payWave is not a part of total supply, since it was moved out of balances
+        uint256 supply = _totalSupply.sub(newPayWave);
 
-        // rebase owed proportional to current balance of the account.
+        // payWave owed proportional to current balance of the account.
         // The decimal factor is used to avoid floating issue.
-        uint256 rebase = proportion.mul(SCALER).div(supply).div(SCALER);
+        uint256 payWave = proportion.mul(SCALER).div(supply).div(SCALER);
 
-        return rebase;
+        return payWave;
     }
 
     /**
      * @dev Called before any edit of {account} balance.
-     * Modifier moves the belonging rebase amount to its balance.
+     * Modifier moves the belonging payWave amount to its balance.
      * @param account is an address of Token holder.
      */
     modifier updateAccount(address account) {
-        uint256 owing = rebaseOwing(account);
-        _accounts[account].lastRebase = totalRebase;
+        uint256 owing = payWaveOwing(account);
+        _accounts[account].lastPayWave = totalPayWave;
 
         if (owing > 0) {
             _accounts[account].balance    = _accounts[account].balance.add(owing);
-            unclaimedRebase     = unclaimedRebase.sub(owing);
+            unclaimedPayWave     = unclaimedPayWave.sub(owing);
 
             emit Transfer(
                 address(0),
@@ -325,8 +325,8 @@ contract CrownsToken is Context, IERC20, Ownable {
     }
 
     /**
-     * @dev Moves `amount` tokens from `account` to {unconfirmedRebase} without reducing the
-     * total supply. Will be rebased among token holders.
+     * @dev Moves `amount` tokens from `account` to {unconfirmedPayWave} without reducing the
+     * total supply. Will be payWaved among token holders.
      *
      * Emits a {Transfer} event with `to` set to the zero address.
      *
@@ -343,7 +343,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
         _accounts[account].balance = _accounts[account].balance.sub(amount);
 
-        unconfirmedRebase = unconfirmedRebase.add(amount);
+        unconfirmedPayWave = unconfirmedPayWave.add(amount);
 
         emit Transfer(account, address(0), amount);
     }
@@ -387,7 +387,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     /**
      * @notice Spend some token from caller's balance in the game.
-     * @dev Moves `amount` of token from caller to `unconfirmedRebase`.
+     * @dev Moves `amount` of token from caller to `unconfirmedPayWave`.
      * @param amount Amount of token used to spend
      */
     function spend(uint256 amount) public returns(bool) {
@@ -410,10 +410,10 @@ contract CrownsToken is Context, IERC20, Ownable {
     }
 
     /**
-     * @notice Return the rebase amount, when `account` balance was updated.
+     * @notice Return the payWave amount, when `account` balance was updated.
      */
-    function getLastRebase(address account) public view returns (uint256) {
-        return _accounts[account].lastRebase;
+    function getLastPayWave(address account) public view returns (uint256) {
+        return _accounts[account].lastPayWave;
     }
 
     /**
@@ -426,26 +426,26 @@ contract CrownsToken is Context, IERC20, Ownable {
     	if (balance == 0) {
     		return 0;
     	}
-    	uint256 owing = rebaseOwing(account);
+    	uint256 owing = payWaveOwing(account);
 
     	return balance.add(owing);
     }
 
     /**
      * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders.
-     * @dev Moves tokens from {unconfirmedRebase} to {totalRebase}.
-     * Any account balance related functions will use {totalRebase} to calculate the dividend shares for each account.
+     * @dev Moves tokens from {unconfirmedPayWave} to {totalPayWave}.
+     * Any account balance related functions will use {totalPayWave} to calculate the dividend shares for each account.
      *
-     * Emits a {Rebase} event.
+     * Emits a {payWave} event.
      */
-    function rebase() public onlyOwner() returns (bool) {
-    	totalRebase = totalRebase.add(unconfirmedRebase);
-    	unclaimedRebase = unclaimedRebase.add(unconfirmedRebase);
-    	unconfirmedRebase = 0;
+    function payWave() public onlyOwner() returns (bool) {
+    	totalPayWave = totalPayWave.add(unconfirmedPayWave);
+    	unclaimedPayWave = unclaimedPayWave.add(unconfirmedPayWave);
+    	unconfirmedPayWave = 0;
 
-        emit Rebase (
-            unconfirmedRebase,
-            totalRebase
+        emit PayWave (
+            unconfirmedPayWave,
+            totalPayWave
         );
 
         return true;
