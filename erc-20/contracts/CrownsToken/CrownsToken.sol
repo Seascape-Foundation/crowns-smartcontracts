@@ -8,7 +8,7 @@ import "./../openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./../openzeppelin/contracts/math/SafeMath.sol";
 import "./../openzeppelin/contracts/utils/Address.sol";
 
-/// @title Official token of Blocklords and the Seascape ecosystem.
+/// @title Official token of the Seascape ecosystem.
 /// @author Medet Ahmetson
 /// @notice Crowns (CWS) is an ERC-20 token with a payWave feature.
 /// Rebasing is a distribution of spent tokens among all current token holders.
