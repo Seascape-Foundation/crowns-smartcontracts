@@ -10,9 +10,10 @@ import "./../../../../openzeppelin/contracts/utils/Address.sol";
 
 /// @title Official token of the Seascape ecosystem.
 /// @author Medet Ahmetson
-/// @notice Crowns (CWS) is an ERC-20 token with a payWave feature.
-/// Rebasing is a distribution of spent tokens among all current token holders.
-/// In order to appear in balance, payWaved tokens need to be claimed by users by triggering transaction with the ERC-20 contract.
+/// @notice Crowns (CWS) is an ERC-20 token with a PayWave feature.
+/// PayWave is a distribution of spent tokens among all current token holders.
+/// In order to appear in balance, the paywaved tokens need
+/// to be claimed by users by triggering any transaction in the ERC-20 contract.
 /// @dev Implementation of the {IERC20} interface.
 contract CrownsToken is Context, IERC20, Ownable {
     using SafeMath for uint256;
@@ -36,26 +37,25 @@ contract CrownsToken is Context, IERC20, Ownable {
     uint256 private constant SCALER = 10 ** 18;
 
 
-    /// @notice Total amount of tokens that have yet to be transferred to token holders as part of a payWave.
-    /// @dev Used Variable tracking unclaimed payWave token amounts.
+    /// @notice Total amount of tokens that have yet to be transferred to token holders as part of the PayWave.
+    /// @dev Used Variable tracking unclaimed PayWave token amounts.
     uint256 public unclaimedPayWave = 0;
-    /// @notice Amount of tokens spent by users that have not been payWaved yet.
+    /// @notice Amount of tokens spent by users that have not been paywaved yet.
     /// @dev Calling the payWave function will move the amount to {totalPayWave}
     uint256 public unconfirmedPayWave = 0;
-    /// @notice Total amount of tokens that were payWaved overall.
-    /// @dev Total aggregate payWave amount that is always increasing.
+    /// @notice Total amount of tokens that were paywaved overall.
+    /// @dev Total paywaved tokens amount that is always increasing.
     uint256 public totalPayWave = 0;
 
 
     /**
-     * @dev Emitted when `spent` tokens are moved `unconfirmedPayWave` to `totalPayWave`.
+     * @dev Emitted when `spent` tokens are moved 
+     * from `unconfirmedPayWave` to `totalPayWave`.
      */
     event PayWave(
         uint256 spent,
         uint256 totalPayWave
     );
-
-
 
     /**
      * @dev Sets the {name} and {symbol} of token.
@@ -64,8 +64,6 @@ contract CrownsToken is Context, IERC20, Ownable {
      * Transfers ownership to another account. So, the token creator will not be counted as an owner.
      */
     constructor () public {
-
-        // Grant the minter roles to a specified account
         address inGameAirdropper     = 0x2F8EAE5771E6100f27D6c382D37d990B4F59b3a2;
         address rechargeDexManager   = 0xD70279EF7B2C83F8D6157219F832F1B00525DDcF;
         address teamManager          = 0xc9603191b6933C97E7e66F5F68697Bb879f47e56;
