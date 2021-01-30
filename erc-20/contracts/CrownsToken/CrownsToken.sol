@@ -438,10 +438,11 @@ contract CrownsToken is Context, IERC20, Ownable {
     function payWave() public onlyOwner() returns (bool) {
     	totalPayWave = totalPayWave.add(unconfirmedPayWave);
     	unclaimedPayWave = unclaimedPayWave.add(unconfirmedPayWave);
-    	unconfirmedPayWave = 0;
+	uint256 payWaved = unconfirmedPayWave;
+	unconfirmedPayWave = 0;
 
         emit PayWave (
-            unconfirmedPayWave,
+            payWaved,
             totalPayWave
         );
 
