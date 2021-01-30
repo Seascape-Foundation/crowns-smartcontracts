@@ -64,30 +64,29 @@ contract CrownsToken is Context, IERC20, Ownable {
      * Transfers ownership to another account. So, the token creator will not be counted as an owner.
      */
     constructor () public {
-        address inGameAirdropper     = 0x2F8EAE5771E6100f27D6c382D37d990B4F59b3a2;
-        address rechargeDexManager   = 0xD70279EF7B2C83F8D6157219F832F1B00525DDcF;
-        address teamManager          = 0xc9603191b6933C97E7e66F5F68697Bb879f47e56;
-        address investManager        = 0x84EdD4C1ebc80243c0e8B5E6119c177838E35F0E;
-        address communityManager     = 0xB257aBb3A2F47eDF8f8E9CEb71D93A90E1050323;
-        address newOwner             = msg.sender;
-
-        // 3 million tokens
-        uint256 inGameAirdrop        = 5e6 * SCALER;
-        uint256 rechargeDex          = 1e6 * SCALER;
-        // 1 million tokens
-        uint256 teamAllocation       = 1e6 * SCALER;
+        address gameIncentivesHolder = 0x2F8EAE5771E6100f27D6c382D37d990B4F59b3a2;
+        address liquidityHolder      = 0xD70279EF7B2C83F8D6157219F832F1B00525DDcF;
+        address teamHolder           = 0xc9603191b6933C97E7e66F5F68697Bb879f47e56;
+        address investHolder         = 0x84EdD4C1ebc80243c0e8B5E6119c177838E35F0E;
+        address communityHolder      = 0xB257aBb3A2F47eDF8f8E9CEb71D93A90E1050323;
+	address newOwner             = 0x522C2989f4Baafd93154356127412dd289Ed3378;
+        // 5 million tokens
+        uint256 gameIncentives       = 5e6 * SCALER;
+        // 1,5 million tokens
+        uint256 reserve              = 15e5 * SCALER; // reserve for the next 5 years.
+	// 1 million tokens
+	uint256 community            = 1e6 * SCALER;
+        uint256 team                 = 1e6 * SCALER;
         uint256 investment           = 1e6 * SCALER;
-        // 750,000 tokens
-        uint256 communityBounty      = 500000 * SCALER;
-        // 1,25 million tokens
-        uint256 inGameReserve        = 1500000 * SCALER; // reserve for the next 5 years.
-
-        _mint(inGameAirdropper,      inGameAirdrop);
-        _mint(rechargeDexManager,    rechargeDex);
-        _mint(teamManager,           teamAllocation);
-        _mint(investManager,         investment);
-        _mint(communityManager,      communityBounty);
-        _mint(newOwner,              inGameReserve);
+        // 500,000 tokens
+        uint256 liquidity            = 5e5 * SCALER;
+	
+        _mint(gameIncentivesHolder,  gameIncentives);
+        _mint(liquidityHolder,       liquidity);
+        _mint(teamHolder,            team);
+        _mint(investHolder,          investment);
+        _mint(communityHolder,       community);
+        _mint(newOwner,              reserve);
 
         transferOwnership(newOwner);
    }
