@@ -1,11 +1,17 @@
-[![N|Solid](https://play.blocklords.io/favicon.png)](https://play.blocklords.io)
 # What is *Crowns*?
-Crowns is the official currency of Blocklords, the first grand strategy game. See the [lightpaper](https://blocklords.io/lightpaper.pdf).
-This repository holds the token source code and token related open sources under *MIT* licence.
+Seascape Network is an incentivized ecosystem consisting of gamers, developers, and influencers. By gamifying the process of onboarding new users into the DeFi ecosystem from start to finish and removing complex barriers, the Seascape Network allows users to seamlessly enter the world of blockchain games and decentralized finance. 
+
+* For Seascape Network's other smartcontract visit [`seascape-smartcontracts`](https://github.com/blocklords/seascape-smartcontracts)
+* See the [lightpaper](http://oss.seascape.network/Seascape_lightpaper.pdf).
+
+Crowns are the official token of the Seascape Network. As such, they are designed to reward all key stakeholders within the network.
+
 
 Deployed contracts on Mainnet:
-- [`0x8c9f6a021039ccbe98451918db6EE629368aD600`](https://rinkeby.etherscan.io/token/0x8c9f6a021039ccbe98451918db6EE629368aD600) &ndash; Crowns (CWS) token.
-- [`0xb32efAc4993a3d0e88a271f1AD21736DAEf3bAD2`](https://rinkeby.etherscan.io/address/0x8c9f6a021039ccbe98451918db6EE629368aD600) - Vesting Contract, to lock CWS for a given period of time.
+- [`0xac0104cca91d167873b8601d2e71eb3d4d8c33e0`](https://etherscan.io/token/0xac0104cca91d167873b8601d2e71eb3d4d8c33e0) &ndash; Crowns (CWS) token.
+
+Deployed contracts on Rinkeby:
+- [`0x230191380F0129e70F8D8B6585c7608656131CD0`](https://rinkeby.etherscan.io/token/0x230191380F0129e70F8D8B6585c7608656131CD0) &ndash; Crowns (CWS) token.
 
 *Crowns (CWS)* could be obtained through purchase on
 - [UniSwap](https://uniswap.org), 
@@ -15,17 +21,20 @@ or, can be earned within the Blocklords game.
 
 # Crowns (CWS) features
 
-Crowns (CWS) is an erc-20 token on Ethereum mainnet. It's primarely used to purchase within Blocklords. The **unique feature** of ***Crowns*** is that, every recharge within the game is spread accross all token holders as dividends. We call it **rebase**.
+Crowns (CWS) is an erc-20 token on Ethereum. It's primarely used to purchase within Blocklords. The **unique feature** of ***Crowns*** is that, every recharge within the game is spread accross all token holders as dividends. We call it **rebase**.
 
-### Supply
+### Tokenomi
 Crown has a fixed supply. Total of 10,000,000 CWS.
-* 10% is going to investors
-* 10% is going to team
-* ...
+* 5,000,000 CWS or 50% is going to game incentives
+* 1,000,000 CWS or 10% is going to community
+* 1,000,000 CWS or 10% is going to investors
+* 1,000,000 CWS or 10% is going to team
+* 5,000 CWS or 5% is going to exchanges
+* 1,500,000 CWS or 15% is going to reserve locke up for 5 years.
 
 # Vesting Contract
 Is a simple contract used to lock Crowns for a certain period of time. It's based on OpenZeppelin's TimeLock token.
-
+**Deprecated**
 
 ---
 
