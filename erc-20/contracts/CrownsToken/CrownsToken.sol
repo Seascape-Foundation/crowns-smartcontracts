@@ -92,8 +92,8 @@ contract CrownsToken is Context, IERC20, Ownable {
    }
 
     /**
-     * @notice Return amount of tokens that {account} gets during payWave
-     * @dev Used both internally and externally to calculate the payWave amount
+     * @notice Return amount of tokens that {account} gets during the PayWave
+     * @dev Used both internally and externally to calculate the PayWave amount
      * @param account is an address of token holder to calculate for
      * @return amount of tokens that player could get
      */
@@ -103,10 +103,10 @@ contract CrownsToken is Context, IERC20, Ownable {
         uint256 newPayWave = totalPayWave.sub(_account.lastPayWave);
         uint256 proportion = _account.balance.mul(newPayWave);
 
-        // The payWave is not a part of total supply, since it was moved out of balances
+        // The PayWave is not a part of total supply, since it was moved out of balances
         uint256 supply = _totalSupply.sub(newPayWave);
 
-        // payWave owed proportional to current balance of the account.
+        // PayWave owed proportional to current balance of the account.
         // The decimal factor is used to avoid floating issue.
         uint256 payWave = proportion.mul(SCALER).div(supply).div(SCALER);
 
@@ -115,7 +115,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     /**
      * @dev Called before any edit of {account} balance.
-     * Modifier moves the belonging payWave amount to its balance.
+     * Modifier moves the belonging PayWave amount to its balance.
      * @param account is an address of Token holder.
      */
     modifier updateAccount(address account) {
@@ -320,7 +320,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     /**
      * @dev Moves `amount` tokens from `account` to {unconfirmedPayWave} without reducing the
-     * total supply. Will be payWaved among token holders.
+     * total supply. Will be paywaved among token holders.
      *
      * Emits a {Transfer} event with `to` set to the zero address.
      *
@@ -404,7 +404,7 @@ contract CrownsToken is Context, IERC20, Ownable {
     }
 
     /**
-     * @notice Return the payWave amount, when `account` balance was updated.
+     * @notice Return the PayWave amount, when `account` balance was updated.
      */
     function getLastPayWave(address account) public view returns (uint256) {
         return _accounts[account].lastPayWave;
@@ -426,11 +426,11 @@ contract CrownsToken is Context, IERC20, Ownable {
     }
 
     /**
-     * @notice Rebasing is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders.
+     * @notice Pay Wave is a unique feature of Crowns (CWS) token. It redistributes tokens spenth within game among all token holders.
      * @dev Moves tokens from {unconfirmedPayWave} to {totalPayWave}.
      * Any account balance related functions will use {totalPayWave} to calculate the dividend shares for each account.
      *
-     * Emits a {payWave} event.
+     * Emits a {PayWave} event.
      */
     function payWave() public onlyOwner() returns (bool) {
     	totalPayWave = totalPayWave.add(unconfirmedPayWave);
