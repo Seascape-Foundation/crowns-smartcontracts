@@ -141,7 +141,7 @@ contract CrownsToken is Context, IERC20, Ownable {
     /**
      * @dev Returns the name of the token.
      */
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return _name;
     }
 
@@ -149,7 +149,7 @@ contract CrownsToken is Context, IERC20, Ownable {
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return _symbol;
     }
 
