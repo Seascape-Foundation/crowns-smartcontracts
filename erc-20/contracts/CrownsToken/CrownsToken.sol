@@ -29,10 +29,9 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     uint256 private _totalSupply;
 
-    string private _name;
-    string private _symbol;
-    uint8 private immutable _decimals;
-    mapping (address => uint256) private _balances;
+    string private constant _name = "Crowns";
+    string private constant _symbol = "CWS";
+    uint8 private immutable _decimals = 18;
 
     uint256 private constant MIN_SPEND = 10 ** 6;
     uint256 private constant SCALER = 10 ** 18;
@@ -50,7 +49,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
 
     /**
-     * @dev Emitted when `spent` tokens are moved 
+     * @dev Emitted when `spent` tokens are moved
      * from `unconfirmedPayWave` to `totalPayWave`.
      */
     event PayWave(
@@ -65,28 +64,20 @@ contract CrownsToken is Context, IERC20, Ownable {
      * Transfers ownership to another account. So, the token creator will not be counted as an owner.
      */
     constructor () public {
-        _name = "Crowns";
-        _symbol = "CWS";
-        _decimals = 18;
-        _totalSupply = 10000000000000000000000000;//10 million
-        _balances[msg.sender] = _totalSupply;
-
-        emit Transfer(address(0), msg.sender, _totalSupply);
-
         address gameIncentivesHolder = 0x94E169Be9037561aC37D8bb3471c7e35B81708A7;
         address liquidityHolder      = 0xf409fDF4069c825656ba3e1f931FCde8525F1bEE;
         address teamHolder           = 0x2Ff42929f444e496D7e856591764E00ee13b7077;
         address investHolder         = 0x2cfca4ccd9ef6d9420ae1ff26306d179DABAEdC2;
         address communityHolder      = 0x2C25ba4DB75D43e655647F24fB0cB2e896116dbD;
-	      address newOwner             = msg.sender;
+	address newOwner             = 0xbfdadB9a06C90B6625aF3C6DAc0Bb7f56a852886;
 
 
-	       // 5 million tokens
+	// 5 million tokens
         uint256 gameIncentives       = 5e6 * SCALER;
         // 1,5 million tokens
         uint256 reserve              = 15e5 * SCALER; // reserve for the next 5 years.
-      	// 1 million tokens
-      	uint256 community            = 1e6 * SCALER;
+	// 1 million tokens
+	uint256 community            = 1e6 * SCALER;
         uint256 team                 = 1e6 * SCALER;
         uint256 investment           = 1e6 * SCALER;
         // 500,000 tokens
@@ -150,7 +141,7 @@ contract CrownsToken is Context, IERC20, Ownable {
     /**
      * @dev Returns the name of the token.
      */
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return _name;
     }
 
@@ -158,7 +149,7 @@ contract CrownsToken is Context, IERC20, Ownable {
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return _symbol;
     }
 
