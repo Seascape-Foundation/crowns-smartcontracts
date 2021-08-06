@@ -62,22 +62,28 @@ contract CrownsToken is Context, IERC20, Ownable {
      * Initializes {decimals} with a default value of 18.
      * Mints all tokens.
      * Transfers ownership to another account. So, the token creator will not be counted as an owner.
+     * @param _test set if all tokens are minted to one user. Otherwise each pool is minted to the certain wallet addresses
      */
-    constructor () public {
+    constructor (bool _test) public {
+        if (_test) {
+            _mint(msg.sender,             10e6 * SCALER);
+            return;
+        }
+
         address gameIncentivesHolder = 0x94E169Be9037561aC37D8bb3471c7e35B81708A7;
         address liquidityHolder      = 0xf409fDF4069c825656ba3e1f931FCde8525F1bEE;
         address teamHolder           = 0x2Ff42929f444e496D7e856591764E00ee13b7077;
         address investHolder         = 0x2cfca4ccd9ef6d9420ae1ff26306d179DABAEdC2;
         address communityHolder      = 0x2C25ba4DB75D43e655647F24fB0cB2e896116dbD;
-	address newOwner             = 0xbfdadB9a06C90B6625aF3C6DAc0Bb7f56a852886;
+	    address newOwner             = 0xbfdadB9a06C90B6625aF3C6DAc0Bb7f56a852886;
 
 
-	// 5 million tokens
+	    // 5 million tokens
         uint256 gameIncentives       = 5e6 * SCALER;
         // 1,5 million tokens
         uint256 reserve              = 15e5 * SCALER; // reserve for the next 5 years.
-	// 1 million tokens
-	uint256 community            = 1e6 * SCALER;
+	    // 1 million tokens
+	    uint256 community            = 1e6 * SCALER;
         uint256 team                 = 1e6 * SCALER;
         uint256 investment           = 1e6 * SCALER;
         // 500,000 tokens
