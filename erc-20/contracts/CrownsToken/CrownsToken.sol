@@ -35,6 +35,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     uint256 private constant MIN_SPEND = 10 ** 6;
     uint256 private constant SCALER = 10 ** 18;
+    uint256 private constant TEN_MILLION = SCALER * 1e7;
 
 
     /// @notice Total amount of tokens that have yet to be transferred to token holders as part of the PayWave.
@@ -46,6 +47,9 @@ contract CrownsToken is Context, IERC20, Ownable {
     /// @notice Total amount of tokens that were paywaved overall.
     /// @dev Total paywaved tokens amount that is always increasing.
     uint256 public totalPayWave = 0;
+
+    /// @notice Maximum possible supply of this token.
+    uint256 public limitSupply = 0;
 
     /// @notice Set to false to stop mint/burn of token. Set to true to allow minting.
     bool public bridgeAllowed = false;
@@ -115,6 +119,7 @@ contract CrownsToken is Context, IERC20, Ownable {
             transferOwnership(newOwner);
         } else {
             bridgeAllowed = true;
+            limitSupply = 5e5 * SCALER;     // Initially it allows 500k tokens to mint
         }
    }
 
@@ -136,6 +141,12 @@ contract CrownsToken is Context, IERC20, Ownable {
        emit RemoveBridge(_bridge);
    }
 
+   function setLimitSupply(uint256 _newLimit) external onlyOwner returns(bool) {
+       require(_newLimit > _totalSupply && _newLimit <= TEN_MILLION, "Crowns: invalid supply limit");
+
+       limitSupply = _newLimit;
+   }
+
    /**
      * @dev Creates `amount` new tokens for `to`.
      *
@@ -146,6 +157,7 @@ contract CrownsToken is Context, IERC20, Ownable {
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to, uint256 amount) external onlyBridge {
+        require(_totalSupply.add(amount) <= limitSupply, "Crowns: exceeds mint limit");
         _mint(to, amount);
     }
 
