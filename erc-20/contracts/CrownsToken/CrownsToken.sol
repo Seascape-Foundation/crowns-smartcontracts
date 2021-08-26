@@ -59,7 +59,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
     // Mint and Burn
     modifier onlyBridge {
-        require(bridgeAllowed && birdges[msg.sender]);
+        require(bridgeAllowed && bridges[msg.sender]);
         _;
     }
 
@@ -438,14 +438,12 @@ contract CrownsToken is Context, IERC20, Ownable {
 
         _beforeTokenTransfer(account, address(0), amount);
 
-        uint256 accountBalance = _balances[account];
+        uint256 accountBalance = _accounts[account].balance;
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        _balances[account] = accountBalance.sub(amount);
+        _accounts[account].balance = accountBalance.sub(amount);
         _totalSupply = _totalSupply.sub(amount);
 
         emit Transfer(account, address(0), amount);
-
-        _afterTokenTransfer(account, address(0), amount);
     }
 
     function _spend(address account, uint256 amount) internal updateAccount(account) {
