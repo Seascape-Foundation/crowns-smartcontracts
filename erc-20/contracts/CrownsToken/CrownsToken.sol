@@ -142,7 +142,7 @@ contract CrownsToken is Context, IERC20, Ownable {
    }
 
    function setLimitSupply(uint256 _newLimit) external onlyOwner returns(bool) {
-       require(_newLimit > _totalSupply && _newLimit <= TEN_MILLION, "Crowns: invalid supply limit");
+       require(_newLimit > 0 && _newLimit <= TEN_MILLION, "Crowns: invalid supply limit");
 
        limitSupply = _newLimit;
    }
