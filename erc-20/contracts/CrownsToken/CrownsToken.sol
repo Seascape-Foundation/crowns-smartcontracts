@@ -125,18 +125,18 @@ contract CrownsToken is Context, IERC20, Ownable {
 
    function addBridge(address _bridge) external onlyOwner returns(bool) {
        require(_bridge != address(0), "Crowns: zero address");
-       require(bridges[msg.sender] == false, "Crowns: already added bridge");
+       require(bridges[bridge] == false, "Crowns: already added bridge");
 
-       bridges[msg.sender] = true;
+       bridges[bridge] = true;
 
        emit AddBridge(_bridge);
    }
 
     function removeBridge(address _bridge) external onlyOwner returns(bool) {
        require(_bridge != address(0), "Crowns: zero address");
-       require(bridges[msg.sender], "Crowns: not added bridge");
+       require(bridges[bridge], "Crowns: not added bridge");
 
-       bridges[msg.sender] = false;
+       bridges[bridge] = false;
 
        emit RemoveBridge(_bridge);
    }
