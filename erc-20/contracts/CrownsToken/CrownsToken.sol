@@ -49,7 +49,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
 
     /**
-     * @dev Emitted when `spent` tokens are moved 
+     * @dev Emitted when `spent` tokens are moved
      * from `unconfirmedPayWave` to `totalPayWave`.
      */
     event PayWave(
@@ -82,7 +82,7 @@ contract CrownsToken is Context, IERC20, Ownable {
         uint256 investment           = 1e6 * SCALER;
         // 500,000 tokens
         uint256 liquidity            = 5e5 * SCALER;
-	
+
         _mint(gameIncentivesHolder,  gameIncentives);
         _mint(liquidityHolder,       liquidity);
         _mint(teamHolder,            team);
@@ -110,7 +110,7 @@ contract CrownsToken is Context, IERC20, Ownable {
 
         // PayWave owed proportional to current balance of the account.
         // The decimal factor is used to avoid floating issue.
-        uint256 payWave = proportion.mul(SCALER).div(supply).div(SCALER);
+        uint256 payWave = proportion.div(supply);
 
         return payWave;
     }
