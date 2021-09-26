@@ -1,12 +1,11 @@
 // contracts/Crowns.sol
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.7;
+pragma solidity 0.8.0;
 
-import "./../../../../openzeppelin/contracts/access/Ownable.sol";
-import "./../../../../openzeppelin/contracts/GSN/Context.sol";
-import "./../../../../openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./../../../../openzeppelin/contracts/math/SafeMath.sol";
-import "./../../../../openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 /// @title Official token of the Seascape ecosystem.
 /// @author Medet Ahmetson
@@ -15,7 +14,7 @@ import "./../../../../openzeppelin/contracts/utils/Address.sol";
 /// In order to appear in balance, the paywaved tokens need
 /// to be claimed by users by triggering any transaction in the ERC-20 contract.
 /// @dev Implementation of the {IERC20} interface.
-contract CrownsToken is Context, IERC20, Ownable {
+contract CrownsToken is IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
