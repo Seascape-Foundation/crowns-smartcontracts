@@ -17,11 +17,11 @@ Deployed contracts on Rinkeby:
 - [UniSwap](https://uniswap.org), 
 - and other exchanges 
 
-or, can be earned within the Blocklords game.
+or, can be earned within the [DeFi minigames](https://game.seascape.network/) game.
 
 # Crowns (CWS) features
 
-Crowns (CWS) is an erc-20 token on Ethereum. It's primarely used to purchase within Blocklords. The **unique feature** of ***Crowns*** is that, every recharge within the game is spread accross all token holders as dividends. We call it **rebase**.
+Crowns (CWS) is an erc-20 token on Ethereum. It's primarely used to purchase within Blocklords. The **unique feature** of ***Crowns*** is that, every recharge within the game is spread accross all token holders as dividends. We call it **Paywave**.
 
 ### Tokenomi
 Crown has a fixed supply. Total of 10,000,000 CWS.
@@ -33,7 +33,7 @@ Crown has a fixed supply. Total of 10,000,000 CWS.
 * 1,500,000 CWS or 15% is going to reserve locke up for 5 years.
 
 # Vesting Contract
-Is a simple contract used to lock Crowns for a certain period of time. It's based on OpenZeppelin's TimeLock token.
+Its a simple contract used to lock Crowns for a certain period of time. It's based on OpenZeppelin's TimeLock token.
 **Deprecated**
 
 ---
