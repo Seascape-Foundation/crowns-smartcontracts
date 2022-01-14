@@ -75,52 +75,9 @@ contract CrownsToken is Context, IERC20, Ownable {
     event AddBridge(address indexed bridge);
     event RemoveBridge(address indexed bridge);
 
-    /**
-     * @dev Sets the {name} and {symbol} of token.
-     * Initializes {decimals} with a default value of 18.
-     * Mints all tokens.
-     * Transfers ownership to another account. So, the token creator will not be counted as an owner.
-     * @param _type o minting:
-     *      0 - ETH primary version of Token. Mints each pool to its dedicated multi-sig wallet account.
-     *      1 - Test version to develop on local network. Mints all supply to one address.
-     *      2 - Sidechain version of Token. Allows minting/burning of token to be done by third parties.
-     */
-    constructor (uint8 _type) public {
-        if (_type == 1) {
-            _mint(msg.sender,             10e6 * SCALER);
-            return;
-        } else if (_type == 0) {
-            // Multi-sig wallet accounts to hold the pools and ownership.
-            address gameIncentivesHolder = 0x94E169Be9037561aC37D8bb3471c7e35B81708A7;
-            address liquidityHolder      = 0xf409fDF4069c825656ba3e1f931FCde8525F1bEE;
-            address teamHolder           = 0x2Ff42929f444e496D7e856591764E00ee13b7077;
-            address investHolder         = 0x2cfca4ccd9ef6d9420ae1ff26306d179DABAEdC2;
-            address communityHolder      = 0x2C25ba4DB75D43e655647F24fB0cB2e896116dbD;
-    	    address newOwner             = 0xbfdadB9a06C90B6625aF3C6DAc0Bb7f56a852886;
-
-	        // 5 million tokens
-            uint256 gameIncentives       = 5e6 * SCALER;
-            // 1,5 million tokens
-            uint256 reserve              = 15e5 * SCALER; // reserve for the next 5 years.
-	        // 1 million tokens
-	        uint256 community            = 1e6 * SCALER;
-            uint256 team                 = 1e6 * SCALER;
-            uint256 investment           = 1e6 * SCALER;
-            // 500,000 tokens
-            uint256 liquidity            = 5e5 * SCALER;
-
-            _mint(gameIncentivesHolder,  gameIncentives);
-            _mint(liquidityHolder,       liquidity);
-            _mint(teamHolder,            team);
-            _mint(investHolder,          investment);
-            _mint(communityHolder,       community);
-            _mint(newOwner,              reserve);
-
-            transferOwnership(newOwner);
-        } else {
-            bridgeAllowed = true;
-            limitSupply = 5e5 * SCALER;     // Initially it allows 500k tokens to mint
-        }
+    constructor () public {
+        bridgeAllowed = true;
+        limitSupply = 5e5 * SCALER;     // Initially it allows 500k tokens to mint
    }
 
    function addBridge(address _bridge) external onlyOwner returns(bool) {
