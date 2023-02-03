@@ -1,4 +1,7 @@
-# What is *Crowns*?
+> # What is *Crowns*?
+> ## THIS REPO HAS BEEN ARCHIVATED, 
+> ## SOURCE CODE MOVED TO [Seascape Smartcontracts](https://github.com/blocklords/seascape-smartcontracts)
+
 Seascape Network is an incentivized ecosystem consisting of gamers, developers, and influencers. By gamifying the process of onboarding new users into the DeFi ecosystem from start to finish and removing complex barriers, the Seascape Network allows users to seamlessly enter the world of blockchain games and decentralized finance. 
 
 * For Seascape Network's other smartcontract visit [`seascape-smartcontracts`](https://github.com/blocklords/seascape-smartcontracts)
